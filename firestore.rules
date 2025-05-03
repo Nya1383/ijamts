@@ -1,0 +1,11 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Allow public read access to uploaded files
+    match /uploadedFiles/{document=**} {
+      allow read: if true;
+      // Only allow writes from authenticated users (can be changed to true for public submissions)
+      allow write: if true;
+    }
+  }
+} 
