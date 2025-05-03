@@ -1,26 +1,96 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #FFFFFF;
+  --secondary-background: #F2F2F2;
+  --border: #D1D1D1;
+  --foreground: #2B2B2B;
+  --secondary-text: #4F4F4F;
+  --muted-text: #7A7A7A;
+  --accent: #3C3C3C;
 }
 
 @theme inline {
   --color-background: var(--background);
+  --color-secondary-background: var(--secondary-background);
+  --color-border: var(--border);
   --color-foreground: var(--foreground);
+  --color-secondary-text: var(--secondary-text);
+  --color-muted-text: var(--muted-text);
+  --color-accent: var(--accent);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    --background: #2B2B2B;
+    --secondary-background: #3C3C3C;
+    --border: #4F4F4F;
+    --foreground: #FFFFFF;
+    --secondary-text: #F2F2F2;
+    --muted-text: #D1D1D1;
+    --accent: #F2F2F2;
   }
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-sans), Arial, Helvetica, sans-serif;
+}
+
+.gradient-bg {
+  background: var(--secondary-background);
+}
+
+.container {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 1rem;
+}
+
+@layer components {
+  .btn {
+    @apply inline-flex items-center justify-center px-6 py-3 rounded-md font-medium transition-colors;
+  }
+
+  .btn-primary {
+    @apply bg-[var(--accent)] text-gray-800 hover:bg-[var(--secondary-text)];
+  }
+
+  .btn-outline {
+    @apply border border-[var(--border)] text-[var(--foreground)] bg-transparent hover:bg-[var(--secondary-background)] hover:text-[var(--accent)];
+  }
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-weight: 600;
+  line-height: 1.2;
+  margin-bottom: 1rem;
+}
+
+h1 {
+  font-size: 2.5rem;
+}
+
+h2 {
+  font-size: 2rem;
+}
+
+h3 {
+  font-size: 1.75rem;
+}
+
+h4 {
+  font-size: 1.5rem;
+}
+
+h5 {
+  font-size: 1.25rem;
+}
+
+h6 {
+  font-size: 1rem;
 }
