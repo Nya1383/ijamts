@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 type BoardMember = {
   id: string;
@@ -61,7 +61,7 @@ export default function EditorialBoardPage() {
       <div className="max-w-6xl mx-auto">
         <h1 className="text-3xl font-bold mb-4">Editorial Board</h1>
         <p className="text-gray-600 dark:text-gray-300 mb-8">
-          Meet the team behind our literary journal
+          Meet the team behind our journal
         </p>
 
         <div className="mb-12">
@@ -69,9 +69,9 @@ export default function EditorialBoardPage() {
             About Our Board
           </h2>
           <p className="text-gray-700 dark:text-gray-300 mb-4">
-            Our editorial board consists of distinguished scholars and practitioners in the field of literature
-            and creative writing. Board members are responsible for maintaining the high standards of our
-            journal and ensuring that published works contribute meaningfully to literary discourse.
+            Our editorial board consists of distinguished scholars and practitioners in the fields of management, 
+            technology, and science. Board members are responsible for maintaining the high standards of our
+            journal and ensuring that published works contribute meaningfully to academic and practical discourse.
           </p>
           <p className="text-gray-700 dark:text-gray-300">
             The board meets quarterly to review the journal's direction, discuss upcoming special issues,

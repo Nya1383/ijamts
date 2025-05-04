@@ -1,6 +1,6 @@
 # IJAMTS Journal Website
 
-This is a modern academic journal website for the International Journal of Advanced Methods in Technology Studies (IJAMTS). The website is built with Next.js, React, and TailwindCSS.
+This is a modern academic journal website for the International Journal of Advances in Management, Technology and Science (IJAMTS). The website is built with Next.js, React, and TailwindCSS.
 
 ## Features
 
