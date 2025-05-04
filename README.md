@@ -9,6 +9,11 @@ This is a modern academic journal website for the International Journal of Advan
 - Academic color palette (navy blue, slate gray, white)
 - Sticky navigation with mobile-friendly menu
 - Two-column layout for content organization
+- Editorial board section with member profiles
+- Archives section for browsing published papers
+- Document viewer for previewing publications
+- Submission system for authors
+- Contact form for inquiries
 - SEO optimized with schema.org metadata
 - Dark mode support
 
@@ -18,6 +23,7 @@ This is a modern academic journal website for the International Journal of Advan
 - [React](https://react.dev/) - UI library
 - [TailwindCSS](https://tailwindcss.com/) - Utility-first CSS framework
 - [TypeScript](https://www.typescriptlang.org/) - Type-safe JavaScript
+- [Firebase](https://firebase.google.com/) - Backend services for document storage and retrieval
 
 ## Getting Started
 
@@ -54,8 +60,20 @@ yarn dev
 
 - `public/` - Static assets like images and icons
 - `src/app/` - Next.js app router files
+  - `archives/` - Archives page for browsing published papers
+  - `contact/` - Contact page with inquiry form
+  - `editorial-board/` - Editorial board members and information
+  - `submission/` - Paper submission system
 - `src/components/` - Reusable UI components
-- `src/styles/` - Global styles and theme configuration
+- `lib/` - Utility functions and configurations
+
+## Key Pages
+
+- **Home** (`/`) - Landing page with recent publications and announcements
+- **Editorial Board** (`/editorial-board`) - Information about the journal's editorial team
+- **Archives** (`/archives`) - Browse and view all published papers
+- **Submission** (`/submission`) - Instructions and form for authors to submit papers
+- **Contact** (`/contact`) - Contact form for inquiries
 
 ## Customization
 
@@ -63,6 +81,7 @@ You can customize the website by modifying the following files:
 
 - `src/app/globals.css` - Global styles and theme variables
 - `src/components/` - UI components for different parts of the website
+- `src/app/editorial-board/page.tsx` - Editorial board member information
 
 ## Deployment
 
