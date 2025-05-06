@@ -116,12 +116,12 @@ export default function Footer() {
             <h4 className="text-[var(--foreground)] font-semibold mb-4">Journal Metrics</h4>
             <div className="bg-[var(--background)] p-4 rounded-lg shadow-sm text-center mb-4 border border-[var(--border)]">
               <div className="text-xs uppercase text-[var(--muted-text)]">Impact Factor</div>
-              <div className="text-3xl font-bold text-[var(--accent)]">2.8</div>
+              <div className="text-3xl font-bold text-[var(--accent)]">0.0</div>
             </div>
             <div className="space-y-2">
               <div className="flex justify-between items-center">
                 <span className="text-sm text-[var(--secondary-text)]">Acceptance Rate</span>
-                <span className="text-sm font-medium">28%</span>
+                <span className="text-sm font-medium">0%</span>
               </div>
               <div className="flex justify-between items-center">
                 <span className="text-sm text-[var(--secondary-text)]">Review Time</span>

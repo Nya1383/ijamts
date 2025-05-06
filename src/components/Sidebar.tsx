@@ -9,7 +9,7 @@ export default function Sidebar() {
           <Image src="/impact-icon.svg" alt="Impact Factor" width={36} height={36} />
         </div>
         <h4 className="text-[var(--foreground)] font-bold mb-2">Impact Factor</h4>
-        <div className="text-5xl font-bold text-[var(--accent)]">2.8</div>
+        <div className="text-5xl font-bold text-[var(--accent)]">0.0</div>
         <p className="text-[var(--muted-text)] text-sm mt-2">2023 Journal Citation Reports</p>
       </div>
 
