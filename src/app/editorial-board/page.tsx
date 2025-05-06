@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { collection, getDocs, query, limit } from "firebase/firestore";
 import { db } from "../../../lib/firebase";
-import { toast, Toaster } from "react-hot-toast";
+import { toast } from "react-hot-toast";
 
 type BoardMember = {
   id: string;
@@ -65,6 +65,29 @@ export default function EditorialBoardPage() {
       order: 6
     },
   ];
+
+  // Function to generate initials from name
+  const getInitials = (name: string): string => {
+    return name
+      .split(' ')
+      .map(word => word && word[0])
+      .filter(Boolean)
+      .join('')
+      .toUpperCase()
+      .substring(0, 2) || 'XX';
+  };
+
+  // Generate random color based on ID
+  const getBackgroundColor = (id: string): string => {
+    const colors = [
+      "bg-blue-500", "bg-green-500", "bg-purple-500", 
+      "bg-pink-500", "bg-indigo-500", "bg-yellow-500"
+    ];
+    // Handle non-integer IDs safely with a stable hash
+    const hash = id.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
+    const index = Math.abs(hash) % colors.length;
+    return colors[index];
+  };
 
   // Memoized fetch function to prevent recreation on every render
   const fetchBoardMembers = useCallback(async () => {
@@ -154,7 +177,7 @@ export default function EditorialBoardPage() {
     } finally {
       setLoading(false);
     }
-  }, [fallbackBoardMembers]); // Remove loading from dependency array
+  }, []); // Remove all unnecessary dependencies
 
   // Only fetch data on mount
   useEffect(() => {
@@ -162,16 +185,22 @@ export default function EditorialBoardPage() {
     
     console.log("Editorial board component mounted");
     
-    // Only try Firestore if we haven't already fallen back to static data
-    if (!fallbackTriggered) {
-      fetchBoardMembers().catch((err) => {
+    const loadData = async () => {
+      try {
+        await fetchBoardMembers();
+      } catch (err) {
         if (isMounted) {
           console.error("Unhandled error in fetchBoardMembers:", err);
           setError("An unexpected error occurred. Please try again later.");
           setBoardMembers(fallbackBoardMembers);
           setLoading(false);
         }
-      });
+      }
+    };
+    
+    // Only try Firestore if we haven't already fallen back to static data
+    if (!fallbackTriggered) {
+      loadData();
     }
     
     // Cleanup function to prevent state updates if component unmounts during fetch
@@ -179,30 +208,7 @@ export default function EditorialBoardPage() {
       isMounted = false;
       console.log("Editorial board component unmounted");
     };
-  }, [fetchBoardMembers, fallbackTriggered, fallbackBoardMembers]);
-
-  // Function to generate initials from name
-  const getInitials = (name: string): string => {
-    return name
-      .split(' ')
-      .map(word => word && word[0])
-      .filter(Boolean)
-      .join('')
-      .toUpperCase()
-      .substring(0, 2) || 'XX';
-  };
-
-  // Generate random color based on ID
-  const getBackgroundColor = (id: string): string => {
-    const colors = [
-      "bg-blue-500", "bg-green-500", "bg-purple-500", 
-      "bg-pink-500", "bg-indigo-500", "bg-yellow-500"
-    ];
-    // Handle non-integer IDs safely with a stable hash
-    const hash = id.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
-    const index = Math.abs(hash) % colors.length;
-    return colors[index];
-  };
+  }, [fetchBoardMembers, fallbackTriggered]);
 
   // Loading state JSX
   if (loading) {
@@ -244,7 +250,6 @@ export default function EditorialBoardPage() {
 
   return (
     <div className="container py-12">
-      <Toaster position="top-right" />
       <div className="max-w-6xl mx-auto">
         {fallbackTriggered && (
           <div className="mb-4 p-4 bg-yellow-50 border-l-4 border-yellow-400 text-yellow-800 dark:bg-yellow-900/20 dark:border-yellow-600 dark:text-yellow-200">

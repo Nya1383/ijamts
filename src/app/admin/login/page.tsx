@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useRouter } from "next/navigation";
 import { toast } from "react-hot-toast";
@@ -12,11 +12,12 @@ export default function LoginPage() {
   const { signIn, user } = useAuth();
   const router = useRouter();
 
-  // If user is already logged in, redirect to admin dashboard
-  if (user) {
-    router.push("/admin");
-    return null;
-  }
+  // Move user redirection to useEffect to avoid setState during render
+  useEffect(() => {
+    if (user) {
+      router.push("/admin");
+    }
+  }, [user, router]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -39,6 +40,15 @@ export default function LoginPage() {
       setLoading(false);
     }
   };
+
+  // Don't render form if user is already logged in
+  if (user) {
+    return (
+      <div className="container py-12 flex justify-center">
+        <div className="animate-spin h-8 w-8 border-4 border-blue-500 rounded-full border-t-transparent"></div>
+      </div>
+    );
+  }
 
   return (
     <div className="container py-12">

@@ -18,6 +18,7 @@ import ProtectedRoute from "@/components/ProtectedRoute";
 import { useAuth } from "@/contexts/AuthContext";
 import { useRouter } from "next/navigation";
 import { toast, Toaster } from "react-hot-toast";
+import { ref } from "firebase/storage";
 
 type SubmissionFile = {
   id: string;
@@ -38,8 +39,35 @@ export default function AdminDashboard() {
   const { user, signOut } = useAuth();
   const router = useRouter();
 
+  // Add debug function to check storage configuration
+  const debugStorageConfig = () => {
+    console.log("Storage bucket:", storage.app.options.storageBucket);
+    try {
+      const testRef = ref(storage, 'test-path');
+      console.log("Test storage reference:", testRef);
+      console.log("Full path:", testRef.fullPath);
+      console.log("Bucket:", testRef.bucket);
+      
+      // Check if the bucket matches the configuration
+      if (testRef.bucket === storage.app.options.storageBucket) {
+        console.log("✅ Storage bucket configuration is consistent");
+      } else {
+        console.error("❌ Storage bucket mismatch:", {
+          configBucket: storage.app.options.storageBucket,
+          referenceBucket: testRef.bucket
+        });
+      }
+    } catch (error) {
+      console.error("Error creating storage reference:", error);
+    }
+  };
+
+  // Run the debug check once on mount when user is authenticated
   useEffect(() => {
     if (user) {
+      // Debug storage config
+      debugStorageConfig();
+      // Fetch submissions
       fetchSubmissions();
     }
   }, [user]);

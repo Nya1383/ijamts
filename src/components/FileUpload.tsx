@@ -45,8 +45,12 @@ export default function FileUpload() {
       
       // Upload file to Firebase Storage
       const storageRef = ref(storage, `submissions/${uniqueFileName}`);
+      console.log("Uploading to storage path:", `submissions/${uniqueFileName}`);
+      
       const uploadResult = await uploadBytes(storageRef, file);
       const downloadURL = await getDownloadURL(uploadResult.ref);
+      
+      console.log("File uploaded successfully, download URL:", downloadURL);
       
       // Save metadata to Firestore
       await addDoc(collection(db, "uploadedFiles"), {
