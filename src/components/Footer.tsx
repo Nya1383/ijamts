@@ -7,7 +7,7 @@ export default function Footer() {
           <div>
             <h4 className="text-[var(--foreground)] font-semibold mb-4">About the Journal</h4>
             <p className="text-sm text-[var(--secondary-text)] mb-4">
-              International Journal of Advanced Methods in Technology Studies (IJAMTS) is a peer-reviewed, open access journal
+              International Journal of Advances in Management, Technology and Science (IJAMTS) is a peer-reviewed, open access journal
               dedicated to publishing high-quality research in various fields of science and technology.
             </p>
             <p className="text-sm text-[var(--secondary-text)]">
@@ -140,7 +140,7 @@ export default function Footer() {
       <div className="bg-[var(--accent)] text-[var(--background)] py-4">
         <div className="container text-center text-sm">
           <p>
-            © {new Date().getFullYear()} International Journal of Advanced Methods in Technology Studies. All Rights Reserved.
+            © {new Date().getFullYear()} International Journal of Advances in Management, Technology and Science. All Rights Reserved.
           </p>
         </div>
       </div>

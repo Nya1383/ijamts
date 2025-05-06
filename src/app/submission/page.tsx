@@ -3,7 +3,7 @@ import { Metadata } from "next";
 
 export const metadata: Metadata = {
   title: "Article Submission - IJAMTS",
-  description: "Submit your article for publication in the International Journal of Advanced Methods in Technology Studies",
+  description: "Submit your article for publication in the International Journal of Advances in Management, Technology and Science",
 };
 
 export default function SubmissionPage() {

@@ -2,7 +2,7 @@ import { Metadata } from "next";
 
 export const metadata: Metadata = {
   title: "Contact Us - IJAMTS",
-  description: "Contact the International Journal of Advanced Methods in Technology Studies team",
+  description: "Contact the International Journal of Advances in Management, Technology and Science team",
 };
 
 export default function ContactPage() {
@@ -20,7 +20,7 @@ export default function ContactPage() {
           <div className="mb-6">
             <h3 className="text-[var(--foreground)] font-semibold mb-2">Address:</h3>
             <p className="text-[var(--secondary-text)]">
-              International Journal of Advanced Methods in Technology Studies<br />
+              International Journal of Advances in Management, Technology and Science<br />
               70, Om Vihar, Phase-3, Uttam Nagar West<br />
               New Delhi-110059
             </p>

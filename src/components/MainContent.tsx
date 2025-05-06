@@ -6,7 +6,7 @@ export default function MainContent() {
         <h2 className="text-2xl font-bold text-[var(--foreground)] mb-4">About the Journal</h2>
         <div className="bg-[var(--background)] rounded-lg shadow-sm p-6 border border-[var(--border)]">
           <p className="mb-4 text-[var(--secondary-text)]">
-            The International Journal of Advanced Methods in Technology Studies (IJAMTS) is a peer-reviewed, open-access journal
+            The International Journal of Advances in Management, Technology and Science (IJAMTS) is a peer-reviewed, open-access journal
             that publishes original research articles, review papers, short communications, and technical notes in all
             areas of science, engineering, and technology.
           </p>

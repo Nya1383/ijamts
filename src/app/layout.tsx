@@ -17,7 +17,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "IJAMTS - International Journal of Advanced Methods in Technology Studies",
+  title: "IJAMTS - International Journal of Advances in Management, Technology and Science",
   description: "A peer-reviewed, open-access journal for scientific research and technological advancements",
 };
 

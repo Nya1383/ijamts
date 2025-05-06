@@ -2,7 +2,7 @@ import { Metadata } from "next";
 
 export const metadata: Metadata = {
   title: "Contact Us - IJAMTS",
-  description: "Contact the International Journal of Advanced Methods in Technology Studies team",
+  description: "Contact the International Journal of Advances in Management, Technology and Science team",
 };
 
 export default function ContactLayout({

@@ -6,7 +6,7 @@ export default function SchemaOrg() {
   const schemaData = {
     "@context": "https://schema.org",
     "@type": "Periodical",
-    "name": "International Journal of Advanced Methods in Technology Studies",
+    "name": "International Journal of Advances in Management, Technology and Science",
     "alternateName": "IJAMTS",
     "issn": "2456-0944",
     "description": "A peer-reviewed, open access journal dedicated to publishing high-quality research in various fields of science and technology.",
