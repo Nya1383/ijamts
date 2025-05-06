@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { db } from "../../../lib/firebase";
-import { collection, getDocs, query, orderBy } from "firebase/firestore";
+import { collection, getDocs, query, orderBy, where } from "firebase/firestore";
 import { toast, Toaster } from "react-hot-toast";
 import DocumentViewer from "@/components/DocumentViewer";
 
@@ -13,6 +13,7 @@ type UploadedFile = {
   downloadURL: string;
   timestamp: Date;
   fileType: string;
+  status?: string;
 };
 
 export default function ArchivesPage() {
@@ -27,20 +28,25 @@ export default function ArchivesPage() {
   const fetchUploadedFiles = async () => {
     try {
       const filesRef = collection(db, "uploadedFiles");
+      // Get all files and filter in JS to ensure we avoid query errors
       const q = query(filesRef, orderBy("timestamp", "desc"));
       const querySnapshot = await getDocs(q);
       
       const files: UploadedFile[] = [];
       querySnapshot.forEach((doc) => {
         const data = doc.data();
-        files.push({
-          id: doc.id,
-          name: data.name,
-          authorName: data.authorName,
-          downloadURL: data.downloadURL,
-          timestamp: data.timestamp.toDate(),
-          fileType: data.fileType,
-        });
+        // Only include documents with status "approved"
+        if (data.status === "approved") {
+          files.push({
+            id: doc.id,
+            name: data.name,
+            authorName: data.authorName,
+            downloadURL: data.downloadURL,
+            timestamp: data.timestamp.toDate(),
+            fileType: data.fileType,
+            status: data.status,
+          });
+        }
       });
       
       setUploadedFiles(files);
@@ -117,7 +123,7 @@ export default function ArchivesPage() {
           </div>
         ) : (
           <div className="text-center py-12 bg-gray-50 dark:bg-gray-800 rounded-lg">
-            <p className="text-gray-500 dark:text-gray-400">No documents have been uploaded yet.</p>
+            <p className="text-gray-500 dark:text-gray-400">No published documents are available yet.</p>
           </div>
         )}
       </div>

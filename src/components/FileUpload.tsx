@@ -1,58 +1,16 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef } from "react";
 import { db, storage } from "../../lib/firebase";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
-import { collection, addDoc, getDocs, query, orderBy } from "firebase/firestore";
+import { collection, addDoc } from "firebase/firestore";
 import { toast, Toaster } from "react-hot-toast";
-import DocumentViewer from "./DocumentViewer";
-
-type UploadedFile = {
-  id: string;
-  name: string;
-  authorName: string;
-  downloadURL: string;
-  timestamp: Date;
-  fileType: string;
-};
 
 export default function FileUpload() {
   const [authorName, setAuthorName] = useState("");
   const [file, setFile] = useState<File | null>(null);
   const [uploading, setUploading] = useState(false);
-  const [uploadedFiles, setUploadedFiles] = useState<UploadedFile[]>([]);
-  const [viewingDocument, setViewingDocument] = useState<UploadedFile | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
-
-  useEffect(() => {
-    fetchUploadedFiles();
-  }, []);
-
-  const fetchUploadedFiles = async () => {
-    try {
-      const filesRef = collection(db, "uploadedFiles");
-      const q = query(filesRef, orderBy("timestamp", "desc"));
-      const querySnapshot = await getDocs(q);
-      
-      const files: UploadedFile[] = [];
-      querySnapshot.forEach((doc) => {
-        const data = doc.data();
-        files.push({
-          id: doc.id,
-          name: data.name,
-          authorName: data.authorName,
-          downloadURL: data.downloadURL,
-          timestamp: data.timestamp.toDate(),
-          fileType: data.fileType,
-        });
-      });
-      
-      setUploadedFiles(files);
-    } catch (error) {
-      console.error("Error fetching files:", error);
-      toast.error("Failed to load uploaded files");
-    }
-  };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
@@ -68,14 +26,6 @@ export default function FileUpload() {
         }
       }
     }
-  };
-
-  const handleViewDocument = (file: UploadedFile) => {
-    setViewingDocument(file);
-  };
-
-  const handleCloseViewer = () => {
-    setViewingDocument(null);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -99,15 +49,16 @@ export default function FileUpload() {
       const downloadURL = await getDownloadURL(uploadResult.ref);
       
       // Save metadata to Firestore
-      const docRef = await addDoc(collection(db, "uploadedFiles"), {
+      await addDoc(collection(db, "uploadedFiles"), {
         name: file.name,
         authorName: authorName,
         downloadURL: downloadURL,
         timestamp: new Date(),
         fileType: fileExtension,
+        status: "pending",
       });
       
-      toast.success("File uploaded successfully!");
+      toast.success("Your article has been submitted successfully! It will be reviewed by our editorial team.");
       
       // Reset form
       setFile(null);
@@ -115,9 +66,6 @@ export default function FileUpload() {
       if (fileInputRef.current) {
         fileInputRef.current.value = "";
       }
-      
-      // Refresh the file list
-      fetchUploadedFiles();
     } catch (error) {
       console.error("Error uploading file:", error);
       toast.error("Failed to upload file. Please try again.");
@@ -129,7 +77,7 @@ export default function FileUpload() {
   return (
     <div className="max-w-4xl mx-auto">
       <Toaster position="top-right" />
-      <div className="bg-white dark:bg-gray-800 shadow-md rounded-lg p-6 mb-8">
+      <div className="bg-white dark:bg-gray-800 shadow-md rounded-lg p-6">
         <h2 className="text-2xl font-bold mb-6">Submit Your Article</h2>
         
         <form onSubmit={handleSubmit} className="space-y-4">
@@ -175,76 +123,10 @@ export default function FileUpload() {
                 : "bg-blue-600 hover:bg-blue-700"
             }`}
           >
-            {uploading ? "Uploading..." : "Upload Document"}
+            {uploading ? "Uploading..." : "Submit Article"}
           </button>
         </form>
       </div>
-      
-      {uploadedFiles.length > 0 && (
-        <div className="bg-white dark:bg-gray-800 shadow-md rounded-lg p-6">
-          <h3 className="text-xl font-bold mb-4">Your Uploaded Documents</h3>
-          <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-gray-200">
-              <thead>
-                <tr>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Document
-                  </th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Author
-                  </th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Date Uploaded
-                  </th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Actions
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-200">
-                {uploadedFiles.map((file) => (
-                  <tr key={file.id}>
-                    <td className="px-4 py-4 whitespace-nowrap">
-                      <div className="text-sm font-medium">{file.name}</div>
-                    </td>
-                    <td className="px-4 py-4 whitespace-nowrap">
-                      <div className="text-sm">{file.authorName}</div>
-                    </td>
-                    <td className="px-4 py-4 whitespace-nowrap">
-                      <div className="text-sm">
-                        {file.timestamp.toLocaleDateString()}
-                      </div>
-                    </td>
-                    <td className="px-4 py-4 whitespace-nowrap space-x-2">
-                      <button
-                        onClick={() => handleViewDocument(file)}
-                        className="inline-flex items-center px-3 py-1 border border-transparent text-sm leading-4 font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-                      >
-                        View
-                      </button>
-                      <a
-                        href={file.downloadURL}
-                        download={file.name}
-                        className="inline-flex items-center px-3 py-1 border border-transparent text-sm leading-4 font-medium rounded-md text-blue-600 bg-blue-100 hover:bg-blue-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-                      >
-                        Download
-                      </a>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
-      )}
-      
-      {viewingDocument && (
-        <DocumentViewer
-          documentUrl={viewingDocument.downloadURL}
-          fileName={viewingDocument.name}
-          onClose={handleCloseViewer}
-        />
-      )}
     </div>
   );
 } 
