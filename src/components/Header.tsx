@@ -19,7 +19,7 @@ export default function Header() {
   };
 
   const submissionItems = [
-    { name: "Submit Your Paper", href: "/submission" },
+    { name: "Submit Your Article", href: "/submission" },
     { name: "Paper Format", href: "/submission/format" },
     { name: "Undertaking Form", href: "/submission/undertaking" },
     { name: "Paper Article Fee", href: "/submission/fee" },
@@ -75,7 +75,7 @@ export default function Header() {
                   </svg>
                 </button>
                 {isSubmissionOpen && (
-                  <div className="absolute left-0 mt-2 w-48 rounded-md shadow-lg bg-[var(--background)] ring-1 ring-black ring-opacity-5">
+                  <div className="absolute left-0 mt-2 w-48 rounded-md shadow-lg bg-[var(--background)] border border-[var(--border)]">
                     <div className="py-1">
                       {submissionItems.map((item) => (
                         <Link
