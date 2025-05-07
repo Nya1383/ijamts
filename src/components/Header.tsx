@@ -7,11 +7,25 @@ import { useAuth } from "@/contexts/AuthContext";
 
 export default function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isSubmissionOpen, setIsSubmissionOpen] = useState(false);
   const { user } = useAuth();
 
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);
   };
+
+  const toggleSubmission = () => {
+    setIsSubmissionOpen(!isSubmissionOpen);
+  };
+
+  const submissionItems = [
+    { name: "Submit Your Paper", href: "/submission" },
+    { name: "Paper Format", href: "/submission/format" },
+    { name: "Undertaking Form", href: "/submission/undertaking" },
+    { name: "Paper Article Fee", href: "/submission/fee" },
+    { name: "Track Article Status", href: "/submission/track" },
+    { name: "Article Ethics", href: "/submission/ethics" },
+  ];
 
   return (
     <header className="sticky top-0 z-50 w-full shadow-md">
@@ -35,11 +49,52 @@ export default function Header() {
               {[
                 { name: "Home", href: "/" },
                 { name: "Editorial Board", href: "/editorial-board" },
+              ].map((item) => (
+                <Link
+                  key={item.name}
+                  href={item.href}
+                  className="px-3 py-4 text-sm font-medium text-[var(--foreground)] hover:text-[var(--accent)] transition-colors"
+                >
+                  {item.name}
+                </Link>
+              ))}
+              <div className="relative">
+                <button
+                  onClick={toggleSubmission}
+                  className="px-3 py-4 text-sm font-medium text-[var(--foreground)] hover:text-[var(--accent)] transition-colors flex items-center"
+                >
+                  Submission
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className={`h-4 w-4 ml-1 transition-transform ${isSubmissionOpen ? 'rotate-180' : ''}`}
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                  </svg>
+                </button>
+                {isSubmissionOpen && (
+                  <div className="absolute left-0 mt-2 w-48 rounded-md shadow-lg bg-[var(--background)] ring-1 ring-black ring-opacity-5">
+                    <div className="py-1">
+                      {submissionItems.map((item) => (
+                        <Link
+                          key={item.name}
+                          href={item.href}
+                          className="block px-4 py-2 text-sm text-[var(--foreground)] hover:bg-[var(--secondary-background)]"
+                          onClick={() => setIsSubmissionOpen(false)}
+                        >
+                          {item.name}
+                        </Link>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+              {[
+                { name: "Current Issue", href: "/current-issue" },
                 { name: "Archives", href: "/archives" },
                 { name: "Conference Proceedings", href: "/proceedings" },
-                { name: "Instructions", href: "/instructions" },
-                { name: "Indexing", href: "/indexing" },
-                { name: "Submission", href: "/submission" },
                 { name: "Contact Us", href: "/contact" },
               ].map((item) => (
                 <Link
@@ -102,11 +157,33 @@ export default function Header() {
               {[
                 { name: "Home", href: "/" },
                 { name: "Editorial Board", href: "/editorial-board" },
+              ].map((item) => (
+                <Link
+                  key={item.name}
+                  href={item.href}
+                  className="block px-4 py-2 text-sm font-medium text-[var(--foreground)] hover:text-[var(--accent)]"
+                  onClick={() => setIsMenuOpen(false)}
+                >
+                  {item.name}
+                </Link>
+              ))}
+              <div className="px-4 py-2">
+                <div className="text-sm font-medium text-[var(--foreground)]">Submission</div>
+                {submissionItems.map((item) => (
+                  <Link
+                    key={item.name}
+                    href={item.href}
+                    className="block pl-4 py-2 text-sm text-[var(--foreground)] hover:text-[var(--accent)]"
+                    onClick={() => setIsMenuOpen(false)}
+                  >
+                    {item.name}
+                  </Link>
+                ))}
+              </div>
+              {[
+                { name: "Current Issue", href: "/current-issue" },
                 { name: "Archives", href: "/archives" },
                 { name: "Conference Proceedings", href: "/proceedings" },
-                { name: "Instructions", href: "/instructions" },
-                { name: "Indexing", href: "/indexing" },
-                { name: "Submission", href: "/submission" },
                 { name: "Contact Us", href: "/contact" },
               ].map((item) => (
                 <Link
