@@ -4,6 +4,8 @@ import { useState, useEffect, useCallback } from "react";
 import { collection, getDocs, query, limit } from "firebase/firestore";
 import { db } from "../../../lib/firebase";
 import { toast } from "react-hot-toast";
+import Link from "next/link";
+import Image from "next/image";
 
 type BoardMember = {
   id: string;
@@ -251,63 +253,46 @@ export default function EditorialBoardPage() {
   return (
     <div className="container py-12">
       <div className="max-w-6xl mx-auto">
-        {fallbackTriggered && (
-          <div className="mb-4 p-4 bg-yellow-50 border-l-4 border-yellow-400 text-yellow-800 dark:bg-yellow-900/20 dark:border-yellow-600 dark:text-yellow-200">
-            <p>Displaying cached data. Some information may not be up to date.</p>
-          </div>
-        )}
+        <h1 className="text-3xl font-bold text-center mb-12">Editorial Board</h1>
         
-        <div className="mb-12">
-          <h2 className="text-2xl font-semibold mb-6 pb-2 border-b border-gray-200 dark:border-gray-700">
-            About Our Board
-          </h2>
-          <p className="text-gray-700 dark:text-gray-300 mb-4">
-            Our editorial board consists of distinguished scholars and practitioners in the fields of management, 
-            technology, and science. Board members are responsible for maintaining the high standards of our
-            journal and ensuring that published works contribute meaningfully to academic and practical discourse.
-          </p>
-          <p className="text-gray-700 dark:text-gray-300">
-            The board meets quarterly to review the journal's direction, discuss upcoming special issues,
-            and evaluate the peer review process. Members serve renewable three-year terms.
-          </p>
-        </div>
-
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           {boardMembers.map((member) => (
-            <div
+            <Link
               key={member.id}
-              className="bg-white dark:bg-gray-800 shadow-md rounded-lg overflow-hidden hover:shadow-lg transition-shadow"
+              href={`/editorial-board/${member.id}`}
+              className="group h-full"
             >
-              <div className={`h-48 ${getBackgroundColor(member.id)} flex items-center justify-center`}>
-                <div className="w-24 h-24 rounded-full bg-white/20 flex items-center justify-center text-white text-3xl font-bold">
-                  {getInitials(member.name)}
+              <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden transition-transform duration-300 group-hover:shadow-lg group-hover:-translate-y-1 h-full flex flex-col">
+                <div className="p-6 flex flex-col flex-grow">
+                  <div className="w-24 h-24 mx-auto mb-4 relative rounded-full overflow-hidden bg-gray-200 flex-shrink-0">
+                    {member.imageUrl ? (
+                      <Image
+                        src={member.imageUrl}
+                        alt={member.name}
+                        fill
+                        className="object-cover"
+                      />
+                    ) : (
+                      <div className={`w-full h-full flex items-center justify-center ${getBackgroundColor(member.id)} text-white text-2xl font-bold`}>
+                        {getInitials(member.name)}
+                      </div>
+                    )}
+                  </div>
+                  <div className="flex flex-col flex-grow">
+                    <h2 className="text-xl font-semibold text-center text-gray-900 dark:text-white mb-2">
+                      {member.name}
+                    </h2>
+                    <p className="text-blue-600 dark:text-blue-400 text-center mb-3">
+                      {member.role}
+                    </p>
+                    <p className="text-gray-600 dark:text-gray-300 text-sm line-clamp-3 flex-grow">
+                      {member.bio}
+                    </p>
+                  </div>
                 </div>
               </div>
-              <div className="p-6">
-                <h3 className="text-xl font-semibold mb-1">{member.name}</h3>
-                <p className="text-blue-600 dark:text-blue-400 font-medium mb-3">
-                  {member.role}
-                </p>
-                <p className="text-gray-600 dark:text-gray-300 text-sm">
-                  {member.bio}
-                </p>
-              </div>
-            </div>
+            </Link>
           ))}
-        </div>
-
-        <div className="mt-16 bg-blue-50 dark:bg-blue-900/20 rounded-lg p-6">
-          <h2 className="text-2xl font-semibold mb-4">Join Our Board</h2>
-          <p className="text-gray-700 dark:text-gray-300 mb-4">
-            We periodically invite qualified individuals to join our editorial board. If you are interested
-            in becoming a board member, please send your CV and a letter of interest to our editorial office.
-          </p>
-          <a
-            href="/contact"
-            className="inline-block bg-blue-600 hover:bg-blue-700 text-white py-2 px-6 rounded-md font-medium transition-colors"
-          >
-            Contact Us
-          </a>
         </div>
       </div>
     </div>
