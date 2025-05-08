@@ -20,7 +20,7 @@ import { useRouter } from "next/navigation";
 import { toast, Toaster } from "react-hot-toast";
 import { ref } from "firebase/storage";
 
-type SubmissionFile = {
+type Article = {
   id: string;
   name: string;
   authorName: string;
@@ -28,14 +28,39 @@ type SubmissionFile = {
   timestamp: Date;
   fileType: string;
   status?: string;
+  undertakingId: string;
+  issue?: string;
+  title?: string;
+  abstract?: string;
+  keywords?: string;
+};
+
+type Undertaking = {
+  id: string;
+  name: string;
+  authorName: string;
+  downloadURL: string;
+  timestamp: Date;
+  fileType: string;
+  status?: string;
+  articleId: string;
 };
 
 export default function AdminDashboard() {
-  const [pendingSubmissions, setPendingSubmissions] = useState<SubmissionFile[]>([]);
-  const [approvedSubmissions, setApprovedSubmissions] = useState<SubmissionFile[]>([]);
+  const [pendingArticles, setPendingArticles] = useState<Article[]>([]);
+  const [currentIssueArticles, setCurrentIssueArticles] = useState<Article[]>([]);
+  const [undertakings, setUndertakings] = useState<{ [key: string]: Undertaking }>({});
   const [loading, setLoading] = useState(true);
-  const [viewingDocument, setViewingDocument] = useState<SubmissionFile | null>(null);
+  const [viewingDocument, setViewingDocument] = useState<Article | null>(null);
   const [activeTab, setActiveTab] = useState("pending");
+  const [showApprovalModal, setShowApprovalModal] = useState(false);
+  const [selectedArticle, setSelectedArticle] = useState<Article | null>(null);
+  const [approvalDetails, setApprovalDetails] = useState({
+    title: '',
+    abstract: '',
+    keywords: ''
+  });
+  const [expandedArticle, setExpandedArticle] = useState<string | null>(null);
   const { user, signOut } = useAuth();
   const router = useRouter();
 
@@ -76,19 +101,18 @@ export default function AdminDashboard() {
     try {
       setLoading(true);
       
-      // Fetch all submissions first
-      const filesRef = collection(db, "uploadedFiles");
-      const queryAllFiles = query(filesRef, orderBy("timestamp", "desc"));
-      const snapshot = await getDocs(queryAllFiles);
+      // Fetch all articles
+      const articlesRef = collection(db, "articles");
+      const queryAllArticles = query(articlesRef, orderBy("timestamp", "desc"));
+      const articlesSnapshot = await getDocs(queryAllArticles);
 
-      const allFiles: SubmissionFile[] = [];
-      const pendingDocs: SubmissionFile[] = [];
-      const approvedDocs: SubmissionFile[] = [];
+      const pendingDocs: Article[] = [];
+      const currentIssueDocs: Article[] = [];
       
-      // Process each document
-      snapshot.forEach((doc) => {
+      // Process each article
+      articlesSnapshot.forEach((doc) => {
         const data = doc.data();
-        const file = {
+        const article = {
           id: doc.id,
           name: data.name,
           authorName: data.authorName,
@@ -96,20 +120,42 @@ export default function AdminDashboard() {
           timestamp: data.timestamp.toDate(),
           fileType: data.fileType,
           status: data.status || "pending",
+          undertakingId: data.undertakingId,
+          issue: data.issue,
+          title: data.title,
+          abstract: data.abstract,
+          keywords: data.keywords
         };
         
-        allFiles.push(file);
-        
-        // Sort into appropriate category
-        if (file.status === "approved") {
-          approvedDocs.push(file);
+        if (article.status === "approved") {
+          currentIssueDocs.push(article);
         } else {
-          pendingDocs.push(file);
+          pendingDocs.push(article);
         }
       });
+
+      // Fetch all undertakings
+      const undertakingsRef = collection(db, "undertakings");
+      const undertakingsSnapshot = await getDocs(undertakingsRef);
+      const undertakingsMap: { [key: string]: Undertaking } = {};
       
-      setPendingSubmissions(pendingDocs);
-      setApprovedSubmissions(approvedDocs);
+      undertakingsSnapshot.forEach((doc) => {
+        const data = doc.data();
+        undertakingsMap[doc.id] = {
+          id: doc.id,
+          name: data.name,
+          authorName: data.authorName,
+          downloadURL: data.downloadURL,
+          timestamp: data.timestamp.toDate(),
+          fileType: data.fileType,
+          status: data.status || "pending",
+          articleId: data.articleId
+        };
+      });
+      
+      setPendingArticles(pendingDocs);
+      setCurrentIssueArticles(currentIssueDocs);
+      setUndertakings(undertakingsMap);
       
     } catch (error) {
       console.error("Error fetching submissions:", error);
@@ -119,24 +165,42 @@ export default function AdminDashboard() {
     }
   };
 
-  const handleViewDocument = (file: SubmissionFile) => {
-    setViewingDocument(file);
+  const handleViewDocument = (article: Article, initialTab: 'article' | 'undertaking' = 'article') => {
+    setViewingDocument(article);
   };
 
   const handleCloseViewer = () => {
     setViewingDocument(null);
   };
 
-  const handleApproveSubmission = async (file: SubmissionFile) => {
+  const handleApproveClick = (article: Article) => {
+    setSelectedArticle(article);
+    setApprovalDetails({
+      title: '',
+      abstract: '',
+      keywords: ''
+    });
+    setShowApprovalModal(true);
+  };
+
+  const handleApproveSubmission = async () => {
+    if (!selectedArticle) return;
+    
     try {
-      const fileRef = doc(db, "uploadedFiles", file.id);
+      const articleRef = doc(db, "articles", selectedArticle.id);
       
-      // Update the status to 'approved'
-      await updateDoc(fileRef, {
+      // Update article with approval details
+      await updateDoc(articleRef, {
         status: "approved",
+        issue: "current",
+        approvedDate: new Date(),
+        title: approvalDetails.title,
+        abstract: approvalDetails.abstract,
+        keywords: approvalDetails.keywords
       });
       
-      toast.success(`"${file.name}" has been approved`);
+      toast.success(`"${selectedArticle.name}" has been approved and added to current issue`);
+      setShowApprovalModal(false);
       
       // Refresh submissions list
       fetchSubmissions();
@@ -147,25 +211,19 @@ export default function AdminDashboard() {
     }
   };
 
-  const handleRejectSubmission = async (file: SubmissionFile, isApproved = false) => {
-    const action = isApproved ? "remove from archives" : "reject and delete";
-    const message = isApproved 
-      ? `Are you sure you want to remove "${file.name}" from the archives? This will permanently delete the submission.`
-      : `Are you sure you want to delete "${file.name}"?`;
+  const handleRejectSubmission = async (article: Article) => {
+    const message = `Are you sure you want to delete "${article.name}"?`;
       
     if (!confirm(message)) {
       return;
     }
     
     try {
-      // Delete the document from Firestore
-      await deleteDoc(doc(db, "uploadedFiles", file.id));
+      // Delete both article and undertaking documents
+      await deleteDoc(doc(db, "articles", article.id));
+      await deleteDoc(doc(db, "undertakings", article.undertakingId));
       
-      const successMessage = isApproved
-        ? `"${file.name}" has been removed from archives`
-        : `"${file.name}" has been rejected and deleted`;
-        
-      toast.success(successMessage);
+      toast.success(`"${article.name}" has been rejected and deleted`);
       
       // Refresh submissions list
       fetchSubmissions();
@@ -176,16 +234,34 @@ export default function AdminDashboard() {
     }
   };
 
-  const handleRevertToPending = async (file: SubmissionFile) => {
-    try {
-      const fileRef = doc(db, "uploadedFiles", file.id);
+  const handleDownload = (article: Article) => {
+    const downloadLink = document.createElement('a');
+    downloadLink.href = article.downloadURL;
+    downloadLink.download = article.name;
+    document.body.appendChild(downloadLink);
+    downloadLink.click();
+    document.body.removeChild(downloadLink);
+    toast.success("Download started");
+  };
+
+  const handleRevertToPending = async (article: Article) => {
+    const message = `Are you sure you want to move "${article.name}" back to pending submissions?`;
       
-      // Update the status back to 'pending'
-      await updateDoc(fileRef, {
+    if (!confirm(message)) {
+      return;
+    }
+    
+    try {
+      const articleRef = doc(db, "articles", article.id);
+      
+      // Update article status back to 'pending' and remove from current issue
+      await updateDoc(articleRef, {
         status: "pending",
+        issue: null,
+        approvedDate: null
       });
       
-      toast.success(`"${file.name}" has been moved back to pending submissions`);
+      toast.success(`"${article.name}" has been moved back to pending submissions`);
       
       // Refresh submissions list
       fetchSubmissions();
@@ -207,12 +283,16 @@ export default function AdminDashboard() {
     }
   };
 
-  const renderSubmissionsList = (submissions: SubmissionFile[]) => {
-    if (submissions.length === 0) {
+  const toggleArticleDetails = (articleId: string) => {
+    setExpandedArticle(expandedArticle === articleId ? null : articleId);
+  };
+
+  const renderSubmissionsList = (articles: Article[]) => {
+    if (articles.length === 0) {
       return (
         <div className="text-center py-12 bg-[var(--background)] rounded-lg">
           <p className="text-[var(--secondary-text)]">
-            No {activeTab} submissions found.
+            No {activeTab === "pending" ? "pending" : "current issue"} submissions found.
           </p>
         </div>
       );
@@ -238,38 +318,67 @@ export default function AdminDashboard() {
             </tr>
           </thead>
           <tbody className="divide-y divide-[var(--border)] bg-[var(--background)]">
-            {submissions.map((file) => (
-              <tr key={file.id}>
+            {articles.map((article) => (
+              <tr key={article.id}>
                 <td className="px-4 py-4 whitespace-nowrap">
-                  <div className="text-sm font-medium text-[var(--foreground)]">{file.name}</div>
-                  <div className="text-xs text-[var(--secondary-text)]">{file.fileType}</div>
+                  <div className="text-sm font-medium text-[var(--foreground)]">{article.name}</div>
+                  <div className="text-xs text-[var(--secondary-text)]">{article.fileType}</div>
+                  {activeTab === "current" && article.title && (
+                    <button
+                      onClick={() => toggleArticleDetails(article.id)}
+                      className="mt-2 text-xs text-[var(--accent)] hover:underline"
+                    >
+                      {expandedArticle === article.id ? 'Hide Details' : 'Show Details'}
+                    </button>
+                  )}
+                  {activeTab === "current" && expandedArticle === article.id && article.title && (
+                    <div className="mt-2 p-3 bg-[var(--secondary-background)] rounded-md">
+                      <div className="mb-2">
+                        <span className="font-medium">Title:</span>
+                        <p className="text-sm">{article.title}</p>
+                      </div>
+                      <div className="mb-2">
+                        <span className="font-medium">Abstract:</span>
+                        <p className="text-sm">{article.abstract}</p>
+                      </div>
+                      <div>
+                        <span className="font-medium">Keywords:</span>
+                        <p className="text-sm">{article.keywords}</p>
+                      </div>
+                    </div>
+                  )}
                 </td>
                 <td className="px-4 py-4 whitespace-nowrap">
-                  <div className="text-sm text-[var(--foreground)]">{file.authorName}</div>
+                  <div className="text-sm text-[var(--foreground)]">{article.authorName}</div>
                 </td>
                 <td className="px-4 py-4 whitespace-nowrap">
                   <div className="text-sm text-[var(--foreground)]">
-                    {file.timestamp.toLocaleDateString()}
+                    {article.timestamp.toLocaleDateString()}
                   </div>
                 </td>
                 <td className="px-4 py-4 whitespace-nowrap space-x-2">
-                  <button
-                    onClick={() => handleViewDocument(file)}
-                    className="inline-flex items-center px-3 py-1 border border-transparent text-sm leading-4 font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none"
-                  >
-                    View
-                  </button>
-                  
                   {activeTab === "pending" ? (
                     <>
                       <button
-                        onClick={() => handleApproveSubmission(file)}
+                        onClick={() => handleViewDocument(article, 'article')}
+                        className="inline-flex items-center px-3 py-1 border border-transparent text-sm leading-4 font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none"
+                      >
+                        View Article
+                      </button>
+                      <button
+                        onClick={() => handleViewDocument(article, 'undertaking')}
+                        className="inline-flex items-center px-3 py-1 border border-transparent text-sm leading-4 font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none"
+                      >
+                        View Undertaking
+                      </button>
+                      <button
+                        onClick={() => handleApproveClick(article)}
                         className="inline-flex items-center px-3 py-1 border border-transparent text-sm leading-4 font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none"
                       >
                         Approve
                       </button>
                       <button
-                        onClick={() => handleRejectSubmission(file, false)}
+                        onClick={() => handleRejectSubmission(article)}
                         className="inline-flex items-center px-3 py-1 border border-transparent text-sm leading-4 font-medium rounded-md text-white bg-red-600 hover:bg-red-700 focus:outline-none"
                       >
                         Reject
@@ -278,18 +387,24 @@ export default function AdminDashboard() {
                   ) : (
                     <>
                       <button
-                        onClick={() => handleRevertToPending(file)}
-                        className="inline-flex items-center px-3 py-1 border border-transparent text-sm leading-4 font-medium rounded-md text-white bg-yellow-600 hover:bg-yellow-700 focus:outline-none"
-                        title="Move back to pending submissions for review"
+                        onClick={() => handleDownload(article)}
+                        className="inline-flex items-center px-3 py-1 border border-transparent text-sm leading-4 font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none"
                       >
-                        Revert to Pending
+                        Download
                       </button>
                       <button
-                        onClick={() => handleRejectSubmission(file, true)}
-                        className="inline-flex items-center px-3 py-1 border border-transparent text-sm leading-4 font-medium rounded-md text-white bg-red-600 hover:bg-red-700 focus:outline-none"
-                        title="Permanently remove this document from archives"
+                        onClick={() => handleRevertToPending(article)}
+                        className="inline-flex items-center px-3 py-1 border border-transparent text-sm leading-4 font-medium rounded-md text-white bg-yellow-600 hover:bg-yellow-700 focus:outline-none"
+                        title="Move back to pending submissions"
                       >
-                        Remove
+                        Revert
+                      </button>
+                      <button
+                        onClick={() => handleRejectSubmission(article)}
+                        className="inline-flex items-center px-3 py-1 border border-transparent text-sm leading-4 font-medium rounded-md text-white bg-red-600 hover:bg-red-700 focus:outline-none"
+                        title="Permanently delete this submission"
+                      >
+                        Delete
                       </button>
                     </>
                   )}
@@ -332,13 +447,13 @@ export default function AdminDashboard() {
               </button>
               <button
                 className={`py-3 px-4 font-medium text-sm border-b-2 ${
-                  activeTab === "approved"
+                  activeTab === "current"
                     ? "border-[var(--accent)] text-[var(--accent)]"
                     : "border-transparent text-[var(--secondary-text)] hover:text-[var(--foreground)]"
                 } transition-colors`}
-                onClick={() => setActiveTab("approved")}
+                onClick={() => setActiveTab("current")}
               >
-                Approved Submissions
+                Current Issue
               </button>
             </div>
           </div>
@@ -349,7 +464,7 @@ export default function AdminDashboard() {
             </div>
           ) : (
             <div className="bg-[var(--background)] shadow-md rounded-lg border border-[var(--border)] overflow-hidden">
-              {activeTab === "pending" ? renderSubmissionsList(pendingSubmissions) : renderSubmissionsList(approvedSubmissions)}
+              {activeTab === "pending" ? renderSubmissionsList(pendingArticles) : renderSubmissionsList(currentIssueArticles)}
             </div>
           )}
         </div>
@@ -358,8 +473,65 @@ export default function AdminDashboard() {
           <DocumentViewer
             documentUrl={viewingDocument.downloadURL}
             fileName={viewingDocument.name}
+            undertakingUrl={undertakings[viewingDocument.undertakingId]?.downloadURL}
+            undertakingName={undertakings[viewingDocument.undertakingId]?.name}
             onClose={handleCloseViewer}
           />
+        )}
+        
+        {showApprovalModal && selectedArticle && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+            <div className="bg-[var(--background)] p-6 rounded-lg w-full max-w-2xl">
+              <h2 className="text-xl font-bold mb-4">Approve Article</h2>
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium mb-1">Title</label>
+                  <input
+                    type="text"
+                    value={approvalDetails.title}
+                    onChange={(e) => setApprovalDetails(prev => ({ ...prev, title: e.target.value }))}
+                    className="w-full p-2 border rounded-md bg-[var(--secondary-background)]"
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-1">Abstract</label>
+                  <textarea
+                    value={approvalDetails.abstract}
+                    onChange={(e) => setApprovalDetails(prev => ({ ...prev, abstract: e.target.value }))}
+                    className="w-full p-2 border rounded-md bg-[var(--secondary-background)] h-32"
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-1">Keywords</label>
+                  <input
+                    type="text"
+                    value={approvalDetails.keywords}
+                    onChange={(e) => setApprovalDetails(prev => ({ ...prev, keywords: e.target.value }))}
+                    className="w-full p-2 border rounded-md bg-[var(--secondary-background)]"
+                    placeholder="Separate keywords with commas"
+                    required
+                  />
+                </div>
+                <div className="flex justify-end space-x-2 mt-4">
+                  <button
+                    onClick={() => setShowApprovalModal(false)}
+                    className="px-4 py-2 border rounded-md hover:bg-[var(--secondary-background)]"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={handleApproveSubmission}
+                    className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700"
+                    disabled={!approvalDetails.title || !approvalDetails.abstract || !approvalDetails.keywords}
+                  >
+                    Approve
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
         )}
       </div>
     </ProtectedRoute>

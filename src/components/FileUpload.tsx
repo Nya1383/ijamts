@@ -3,26 +3,44 @@
 import { useState, useRef } from "react";
 import { db, storage } from "../../lib/firebase";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
-import { collection, addDoc } from "firebase/firestore";
+import { collection, addDoc, doc, updateDoc } from "firebase/firestore";
 import { toast, Toaster } from "react-hot-toast";
 
 export default function FileUpload() {
   const [authorName, setAuthorName] = useState("");
-  const [file, setFile] = useState<File | null>(null);
+  const [articleFile, setArticleFile] = useState<File | null>(null);
+  const [undertakingFile, setUndertakingFile] = useState<File | null>(null);
   const [uploading, setUploading] = useState(false);
-  const fileInputRef = useRef<HTMLInputElement>(null);
+  const articleFileInputRef = useRef<HTMLInputElement>(null);
+  const undertakingFileInputRef = useRef<HTMLInputElement>(null);
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleArticleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
       const selectedFile = e.target.files[0];
       const fileExtension = selectedFile.name.split('.').pop()?.toLowerCase();
       
       if (fileExtension === 'doc' || fileExtension === 'docx') {
-        setFile(selectedFile);
+        setArticleFile(selectedFile);
       } else {
         toast.error("Please upload only .doc or .docx files");
-        if (fileInputRef.current) {
-          fileInputRef.current.value = "";
+        if (articleFileInputRef.current) {
+          articleFileInputRef.current.value = "";
+        }
+      }
+    }
+  };
+
+  const handleUndertakingFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      const selectedFile = e.target.files[0];
+      const fileExtension = selectedFile.name.split('.').pop()?.toLowerCase();
+      
+      if (fileExtension === 'doc' || fileExtension === 'docx') {
+        setUndertakingFile(selectedFile);
+      } else {
+        toast.error("Please upload only .doc or .docx files for the undertaking form");
+        if (undertakingFileInputRef.current) {
+          undertakingFileInputRef.current.value = "";
         }
       }
     }
@@ -31,48 +49,72 @@ export default function FileUpload() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!file || !authorName.trim()) {
-      toast.error("Please provide your name and select a file");
+    if (!articleFile || !undertakingFile || !authorName.trim()) {
+      toast.error("Please provide your name, article file, and undertaking form");
       return;
     }
     
     setUploading(true);
     
     try {
-      // Generate a unique file name to prevent overwrites
-      const fileExtension = file.name.split('.').pop();
-      const uniqueFileName = `${Date.now()}-${file.name}`;
+      // Generate unique file names
+      const articleFileExtension = articleFile.name.split('.').pop();
+      const undertakingFileExtension = undertakingFile.name.split('.').pop();
+      const uniqueArticleFileName = `${Date.now()}-article-${articleFile.name}`;
+      const uniqueUndertakingFileName = `${Date.now()}-undertaking-${undertakingFile.name}`;
       
-      // Upload file to Firebase Storage
-      const storageRef = ref(storage, `submissions/${uniqueFileName}`);
-      console.log("Uploading to storage path:", `submissions/${uniqueFileName}`);
+      // Upload article file
+      const articleStorageRef = ref(storage, `articles/${uniqueArticleFileName}`);
+      const articleUploadResult = await uploadBytes(articleStorageRef, articleFile);
+      const articleDownloadURL = await getDownloadURL(articleUploadResult.ref);
       
-      const uploadResult = await uploadBytes(storageRef, file);
-      const downloadURL = await getDownloadURL(uploadResult.ref);
+      // Upload undertaking file
+      const undertakingStorageRef = ref(storage, `undertakings/${uniqueUndertakingFileName}`);
+      const undertakingUploadResult = await uploadBytes(undertakingStorageRef, undertakingFile);
+      const undertakingDownloadURL = await getDownloadURL(undertakingUploadResult.ref);
       
-      console.log("File uploaded successfully, download URL:", downloadURL);
-      
-      // Save metadata to Firestore
-      await addDoc(collection(db, "uploadedFiles"), {
-        name: file.name,
+      // Save article metadata to Firestore
+      const articleDoc = await addDoc(collection(db, "articles"), {
+        name: articleFile.name,
         authorName: authorName,
-        downloadURL: downloadURL,
+        downloadURL: articleDownloadURL,
         timestamp: new Date(),
-        fileType: fileExtension,
+        fileType: articleFileExtension,
         status: "pending",
+        undertakingId: null // Will be updated after creating undertaking doc
+      });
+
+      // Save undertaking metadata to Firestore
+      const undertakingDoc = await addDoc(collection(db, "undertakings"), {
+        name: undertakingFile.name,
+        authorName: authorName,
+        downloadURL: undertakingDownloadURL,
+        timestamp: new Date(),
+        fileType: undertakingFileExtension,
+        status: "pending",
+        articleId: articleDoc.id
+      });
+
+      // Update article with undertaking reference
+      await updateDoc(doc(db, "articles", articleDoc.id), {
+        undertakingId: undertakingDoc.id
       });
       
-      toast.success("Your article has been submitted successfully! It will be reviewed by our editorial team.");
+      toast.success("Your article and undertaking form have been submitted successfully! They will be reviewed by our editorial team.");
       
       // Reset form
-      setFile(null);
+      setArticleFile(null);
+      setUndertakingFile(null);
       setAuthorName("");
-      if (fileInputRef.current) {
-        fileInputRef.current.value = "";
+      if (articleFileInputRef.current) {
+        articleFileInputRef.current.value = "";
+      }
+      if (undertakingFileInputRef.current) {
+        undertakingFileInputRef.current.value = "";
       }
     } catch (error) {
-      console.error("Error uploading file:", error);
-      toast.error("Failed to upload file. Please try again.");
+      console.error("Error uploading files:", error);
+      toast.error("Failed to upload files. Please try again.");
     } finally {
       setUploading(false);
     }
@@ -101,20 +143,38 @@ export default function FileUpload() {
           </div>
           
           <div>
-            <label htmlFor="file" className="block text-sm font-medium mb-1">
-              Document File (.doc or .docx only)
+            <label htmlFor="articleFile" className="block text-sm font-medium mb-1">
+              Article File (.doc or .docx only)
             </label>
             <input
               type="file"
-              id="file"
-              ref={fileInputRef}
-              onChange={handleFileChange}
+              id="articleFile"
+              ref={articleFileInputRef}
+              onChange={handleArticleFileChange}
               className="w-full px-4 py-2 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               accept=".doc,.docx"
               required
             />
             <p className="text-xs mt-1 text-gray-500">
               Only Microsoft Word documents (.doc or .docx) are accepted
+            </p>
+          </div>
+
+          <div>
+            <label htmlFor="undertakingFile" className="block text-sm font-medium mb-1">
+              Undertaking Form (.doc or .docx only)
+            </label>
+            <input
+              type="file"
+              id="undertakingFile"
+              ref={undertakingFileInputRef}
+              onChange={handleUndertakingFileChange}
+              className="w-full px-4 py-2 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              accept=".doc,.docx"
+              required
+            />
+            <p className="text-xs mt-1 text-gray-500">
+              Only Microsoft Word documents (.doc or .docx) are accepted for the undertaking form
             </p>
           </div>
           

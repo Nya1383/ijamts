@@ -3,35 +3,75 @@
 import { useState, useEffect } from "react";
 import { toast } from "react-hot-toast";
 
-interface DocumentViewerProps {
+type DocumentViewerProps = {
   documentUrl: string;
   fileName: string;
+  undertakingUrl?: string;
+  undertakingName?: string;
   onClose: () => void;
-}
+};
 
-export default function DocumentViewer({ documentUrl, fileName, onClose }: DocumentViewerProps) {
+export default function DocumentViewer({ documentUrl, fileName, undertakingUrl, undertakingName, onClose }: DocumentViewerProps) {
   const [loading, setLoading] = useState(true);
   const [loadAttempted, setLoadAttempted] = useState(false);
+  const [activeTab, setActiveTab] = useState<'article' | 'undertaking'>('article');
   
   // Get direct document URL
   const getDirectUrl = () => {
-    return documentUrl || '';
+    return activeTab === 'article' ? documentUrl : undertakingUrl || '';
   };
   
   // Get Google Docs viewer URL
   const getGoogleViewerUrl = () => {
-    if (!documentUrl) return '';
-    return `https://docs.google.com/viewer?url=${encodeURIComponent(documentUrl)}&embedded=true`;
+    const url = activeTab === 'article' ? documentUrl : undertakingUrl || '';
+    if (!url) return '';
+    return `https://docs.google.com/viewer?url=${encodeURIComponent(url)}&embedded=true`;
   };
   
   // Handle download
   const handleDownload = () => {
-    if (!documentUrl) {
-      toast.error("Invalid document URL");
+    const url = activeTab === 'article' ? documentUrl : undertakingUrl;
+    const name = activeTab === 'article' ? fileName : undertakingName;
+    
+    if (!url) {
+      toast.error("Document URL is not available");
       return;
     }
-    window.open(documentUrl, "_blank");
-    toast.success("Download started");
+
+    // Create temporary link for downloading
+    const downloadLink = document.createElement('a');
+    downloadLink.href = url;
+    downloadLink.download = name || (activeTab === 'article' ? 'article.docx' : 'undertaking.docx');
+    document.body.appendChild(downloadLink);
+    downloadLink.click();
+    document.body.removeChild(downloadLink);
+    
+    toast.success(`Downloading ${activeTab === 'article' ? 'article' : 'undertaking form'}...`);
+  };
+
+  // Handle download both
+  const handleDownloadBoth = () => {
+    if (!documentUrl || !undertakingUrl) {
+      toast.error("One or both documents are not available");
+      return;
+    }
+
+    // Create temporary links for downloading
+    const downloadArticle = document.createElement('a');
+    downloadArticle.href = documentUrl;
+    downloadArticle.download = fileName;
+    document.body.appendChild(downloadArticle);
+    downloadArticle.click();
+    document.body.removeChild(downloadArticle);
+
+    const downloadUndertaking = document.createElement('a');
+    downloadUndertaking.href = undertakingUrl;
+    downloadUndertaking.download = undertakingName || 'undertaking.docx';
+    document.body.appendChild(downloadUndertaking);
+    downloadUndertaking.click();
+    document.body.removeChild(downloadUndertaking);
+
+    toast.success("Downloading both documents...");
   };
   
   // Set a timeout for slow loading
@@ -52,12 +92,45 @@ export default function DocumentViewer({ documentUrl, fileName, onClose }: Docum
     setLoadAttempted(true);
   }, []);
 
+  // Reset loading state when switching tabs
+  useEffect(() => {
+    setLoading(true);
+  }, [activeTab]);
+
   return (
     <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 p-4">
       <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl w-full max-w-6xl h-[90vh] flex flex-col">
         {/* Header */}
         <div className="p-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
-          <h3 className="text-xl font-semibold truncate">{fileName}</h3>
+          <div className="flex items-center space-x-4">
+            <h3 className="text-xl font-semibold truncate">
+              {activeTab === 'article' ? fileName : undertakingName}
+            </h3>
+            {undertakingUrl && (
+              <div className="flex space-x-2">
+                <button
+                  onClick={() => setActiveTab('article')}
+                  className={`px-3 py-1 rounded-md text-sm font-medium ${
+                    activeTab === 'article'
+                      ? 'bg-blue-100 text-blue-700'
+                      : 'text-gray-600 hover:bg-gray-100'
+                  }`}
+                >
+                  Article
+                </button>
+                <button
+                  onClick={() => setActiveTab('undertaking')}
+                  className={`px-3 py-1 rounded-md text-sm font-medium ${
+                    activeTab === 'undertaking'
+                      ? 'bg-blue-100 text-blue-700'
+                      : 'text-gray-600 hover:bg-gray-100'
+                  }`}
+                >
+                  Undertaking
+                </button>
+              </div>
+            )}
+          </div>
           <div className="flex items-center space-x-2">
             <button
               onClick={handleDownload}
@@ -103,7 +176,7 @@ export default function DocumentViewer({ documentUrl, fileName, onClose }: Docum
           )}
           
           {/* Direct document link for PDF files (faster loading for PDFs) */}
-          {documentUrl && documentUrl.toLowerCase().endsWith('.pdf') ? (
+          {getDirectUrl().toLowerCase().endsWith('.pdf') ? (
             <iframe
               src={getDirectUrl()}
               className="w-full h-full border-0"
@@ -127,7 +200,7 @@ export default function DocumentViewer({ documentUrl, fileName, onClose }: Docum
                   container.appendChild(iframe);
                 }
               }}
-              title={`Preview of ${fileName}`}
+              title={`Preview of ${activeTab === 'article' ? fileName : undertakingName}`}
               sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-downloads"
             />
           ) : (
@@ -140,7 +213,7 @@ export default function DocumentViewer({ documentUrl, fileName, onClose }: Docum
                 setLoading(false);
                 toast.error("Unable to preview document. Please download it instead.");
               }}
-              title={`Preview of ${fileName}`}
+              title={`Preview of ${activeTab === 'article' ? fileName : undertakingName}`}
               sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-downloads"
             />
           )}
