@@ -1,13 +1,11 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState, useEffect } from "react";
 import { db } from "../../../lib/firebase";
-import { collection, getDocs, query, orderBy, where } from "firebase/firestore";
-import { toast } from "react-hot-toast";
-import DocumentViewer from "@/components/DocumentViewer";
-import { testStorageConnection, checkExistingFileURLs } from "@/utils/storageDebug";
+import { collection, getDocs } from "firebase/firestore";
+import { toast, Toaster } from "react-hot-toast";
 
-type UploadedFile = {
+type Article = {
   id: string;
   name: string;
   authorName: string;
@@ -15,35 +13,57 @@ type UploadedFile = {
   timestamp: Date;
   fileType: string;
   status?: string;
+  undertakingId: string;
+  issue?: string;
+  title?: string;
+  abstract?: string;
+  keywords?: string;
+  archiveName?: string;
+};
+
+type Archive = {
+  id: string;
+  name: string;
+  createdAt: Date;
 };
 
 export default function ArchivesPage() {
-  const [uploadedFiles, setUploadedFiles] = useState<UploadedFile[]>([]);
+  const [archives, setArchives] = useState<Archive[]>([]);
+  const [archivedArticles, setArchivedArticles] = useState<{ [key: string]: Article[] }>({});
   const [loading, setLoading] = useState(true);
-  const [viewingDocument, setViewingDocument] = useState<UploadedFile | null>(null);
-  const [debugVisible, setDebugVisible] = useState(false);
-  const [debugResult, setDebugResult] = useState<any>(null);
+  const [expandedArticle, setExpandedArticle] = useState<string | null>(null);
 
   useEffect(() => {
-    fetchUploadedFiles();
+    fetchArchives();
   }, []);
 
-  const fetchUploadedFiles = async () => {
+  const fetchArchives = async () => {
     try {
-      const filesRef = collection(db, "uploadedFiles");
-      // Get all files and filter in JS to ensure we avoid query errors
-      const q = query(filesRef, orderBy("timestamp", "desc"));
-      const querySnapshot = await getDocs(q);
+      setLoading(true);
+      const archivesRef = collection(db, "archives");
+      const archivesSnapshot = await getDocs(archivesRef);
+      const archivesList: Archive[] = [];
       
-      const files: UploadedFile[] = [];
-      querySnapshot.forEach((doc) => {
+      archivesSnapshot.forEach((doc) => {
         const data = doc.data();
-        // Only include documents with status "approved"
-        if (data.status === "approved") {
-          // Log the download URL to debug
-          console.log(`Document ${data.name} URL:`, data.downloadURL);
-          
-          files.push({
+        archivesList.push({
+          id: doc.id,
+          name: data.name,
+          createdAt: data.createdAt.toDate()
+        });
+      });
+      
+      setArchives(archivesList);
+      
+      // Fetch articles for each archive
+      const articlesRef = collection(db, "articles");
+      const articlesSnapshot = await getDocs(articlesRef);
+      const archiveArticles: { [key: string]: Article[] } = {};
+      
+      articlesSnapshot.forEach((doc) => {
+        const data = doc.data();
+        if (data.status === "approved" && data.archiveName) {
+          const article = {
             id: doc.id,
             name: data.name,
             authorName: data.authorName,
@@ -51,152 +71,130 @@ export default function ArchivesPage() {
             timestamp: data.timestamp.toDate(),
             fileType: data.fileType,
             status: data.status,
-          });
+            undertakingId: data.undertakingId,
+            issue: data.issue,
+            title: data.title,
+            abstract: data.abstract,
+            keywords: data.keywords,
+            archiveName: data.archiveName
+          };
+          
+          if (!archiveArticles[data.archiveName]) {
+            archiveArticles[data.archiveName] = [];
+          }
+          archiveArticles[data.archiveName].push(article);
         }
       });
       
-      setUploadedFiles(files);
-      
-      // Check existing URL domains
-      checkExistingFileURLs(files);
+      setArchivedArticles(archiveArticles);
     } catch (error) {
-      console.error("Error fetching files:", error);
-      toast.error("Failed to load archived documents");
+      console.error("Error fetching archives:", error);
+      toast.error("Failed to load archives");
     } finally {
       setLoading(false);
     }
   };
 
-  // Debug function to test storage
-  const handleDebugStorage = async () => {
-    try {
-      setDebugVisible(true);
-      const result = await testStorageConnection();
-      setDebugResult(result);
-    } catch (error: any) {
-      console.error("Debug error:", error);
-      setDebugResult({ error: error.message });
-    }
+  const handleDownload = (article: Article) => {
+    const downloadLink = document.createElement('a');
+    downloadLink.href = article.downloadURL;
+    downloadLink.download = article.name;
+    document.body.appendChild(downloadLink);
+    downloadLink.click();
+    document.body.removeChild(downloadLink);
+    toast.success("Download started");
   };
 
-  const handleViewDocument = (file: UploadedFile) => {
-    // Log the document being viewed to debug
-    console.log("Viewing document:", file.name);
-    console.log("Download URL:", file.downloadURL);
-    setViewingDocument(file);
-  };
-
-  const handleCloseViewer = () => {
-    setViewingDocument(null);
+  const toggleArticleDetails = (articleId: string) => {
+    setExpandedArticle(expandedArticle === articleId ? null : articleId);
   };
 
   return (
     <div className="container py-12">
+      <Toaster position="top-right" />
       <div className="max-w-6xl mx-auto">
-        <div className="flex justify-between items-center mb-4">
-          <h1 className="text-3xl font-bold">Archives</h1>
-          
-          {/* Hidden debug button - only visible in development */}
-          {process.env.NODE_ENV === 'development' && (
-            <button 
-              onClick={handleDebugStorage}
-              className="text-xs px-2 py-1 bg-gray-200 hover:bg-gray-300 rounded"
-            >
-              Debug Storage
-            </button>
-          )}
-        </div>
-        
-        <p className="text-gray-600 dark:text-gray-300 mb-8">
-          Browse all published articles and submissions
-        </p>
-        
-        {/* Debug results display */}
-        {debugVisible && debugResult && (
-          <div className="mb-6 p-4 bg-gray-100 dark:bg-gray-800 rounded-lg text-sm">
-            <div className="flex justify-between">
-              <h3 className="font-bold mb-2">Storage Debug Results</h3>
-              <button 
-                onClick={() => setDebugVisible(false)}
-                className="text-gray-500 hover:text-gray-700"
-              >
-                ×
-              </button>
-            </div>
-            <div className="overflow-auto max-h-36">
-              <pre className="text-xs">{JSON.stringify(debugResult, null, 2)}</pre>
-            </div>
-          </div>
-        )}
+        <h1 className="text-3xl font-bold text-[var(--foreground)] mb-8">Archives</h1>
         
         {loading ? (
           <div className="flex justify-center py-12">
-            <div className="animate-spin h-8 w-8 border-4 border-blue-500 rounded-full border-t-transparent"></div>
+            <div className="animate-spin h-8 w-8 border-4 border-[var(--accent)] rounded-full border-t-transparent"></div>
           </div>
-        ) : uploadedFiles.length > 0 ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {uploadedFiles.map((file) => (
-              <div 
-                key={file.id} 
-                className="bg-white dark:bg-gray-800 shadow-md rounded-lg p-6 hover:shadow-lg transition-shadow"
-              >
-                <div className="flex items-start justify-between mb-4">
-                  <div>
-                    <h2 className="text-xl font-semibold mb-1 line-clamp-2">{file.name}</h2>
-                    <p className="text-gray-600 dark:text-gray-400 text-sm">
-                      By: {file.authorName}
-                    </p>
-                    <p className="text-gray-500 dark:text-gray-500 text-xs mt-1">
-                      Uploaded: {file.timestamp.toLocaleDateString()}
-                    </p>
-                    
-                    {/* Display URL domain for debugging */}
-                    {process.env.NODE_ENV === 'development' && (
-                      <p className="text-xs text-gray-400 mt-1 break-all">
-                        {file.downloadURL.includes('appspot') ? '(appspot URL)' : 
-                         file.downloadURL.includes('firebasestorage.app') ? '(firebasestorage URL)' : '(other URL)'}
-                      </p>
-                    )}
-                  </div>
-                  <div className="flex-shrink-0 p-2">
-                    <div className="text-xs font-medium px-2 py-1 bg-blue-100 text-blue-800 rounded">
-                      {file.fileType}
-                    </div>
-                  </div>
+        ) : archives.length === 0 ? (
+          <div className="text-center py-12 bg-[var(--background)] rounded-lg">
+            <p className="text-[var(--secondary-text)]">No archives available.</p>
+          </div>
+        ) : (
+          <div className="space-y-8">
+            {archives.map((archive) => (
+              <div key={archive.id} className="bg-[var(--background)] shadow-md rounded-lg border border-[var(--border)] overflow-hidden">
+                <div className="p-6 border-b border-[var(--border)]">
+                  <h2 className="text-2xl font-bold text-[var(--foreground)]">{archive.name}</h2>
+                  <p className="text-sm text-[var(--secondary-text)] mt-1">
+                    Created on {archive.createdAt.toLocaleDateString()}
+                  </p>
                 </div>
                 
-                <div className="flex space-x-2 mt-4">
-                  <button
-                    onClick={() => handleViewDocument(file)}
-                    className="flex-1 text-center py-2 px-4 bg-blue-600 hover:bg-blue-700 text-white rounded-md text-sm font-medium transition-colors"
-                  >
-                    View
-                  </button>
-                  <a
-                    href={file.downloadURL}
-                    download={file.name}
-                    className="flex-1 text-center py-2 px-4 bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 rounded-md text-sm font-medium transition-colors"
-                  >
-                    Download
-                  </a>
-                </div>
+                {archivedArticles[archive.name]?.length > 0 ? (
+                  <div className="divide-y divide-[var(--border)]">
+                    {archivedArticles[archive.name].map((article) => (
+                      <div key={article.id} className="p-6">
+                        <div className="flex justify-between items-start">
+                          <div>
+                            <h3 className="text-lg font-semibold text-[var(--foreground)]">
+                              {article.title || article.name}
+                            </h3>
+                            <p className="text-sm text-[var(--secondary-text)] mt-1">
+                              By {article.authorName}
+                            </p>
+                            <p className="text-sm text-[var(--secondary-text)]">
+                              Published on {article.timestamp.toLocaleDateString()}
+                            </p>
+                          </div>
+                          <div className="flex space-x-2">
+                            <button
+                              onClick={() => toggleArticleDetails(article.id)}
+                              className="px-3 py-1 text-sm text-[var(--accent)] hover:underline"
+                            >
+                              {expandedArticle === article.id ? 'Hide Details' : 'Show Details'}
+                            </button>
+                            <button
+                              onClick={() => handleDownload(article)}
+                              className="px-4 py-1 bg-[var(--accent)] text-white rounded-md hover:bg-opacity-90 text-sm"
+                            >
+                              Download
+                            </button>
+                          </div>
+                        </div>
+                        
+                        {expandedArticle === article.id && (
+                          <div className="mt-4 p-4 bg-[var(--secondary-background)] rounded-md">
+                            {article.abstract && (
+                              <div className="mb-4">
+                                <h4 className="font-medium text-[var(--foreground)] mb-2">Abstract</h4>
+                                <p className="text-sm text-[var(--foreground)]">{article.abstract}</p>
+                              </div>
+                            )}
+                            {article.keywords && (
+                              <div>
+                                <h4 className="font-medium text-[var(--foreground)] mb-2">Keywords</h4>
+                                <p className="text-sm text-[var(--foreground)]">{article.keywords}</p>
+                              </div>
+                            )}
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="p-6 text-center text-[var(--secondary-text)]">
+                    No articles in this archive yet.
+                  </div>
+                )}
               </div>
             ))}
           </div>
-        ) : (
-          <div className="text-center py-12 bg-gray-50 dark:bg-gray-800 rounded-lg">
-            <p className="text-gray-500 dark:text-gray-400">No published documents are available yet.</p>
-          </div>
         )}
       </div>
-      
-      {viewingDocument && (
-        <DocumentViewer
-          documentUrl={viewingDocument.downloadURL}
-          fileName={viewingDocument.name}
-          onClose={handleCloseViewer}
-        />
-      )}
     </div>
   );
 } 

@@ -587,6 +587,29 @@ export default function AdminDashboard() {
     setShowMoveToArchiveModal(true);
   };
 
+  const handleRevertFromArchive = async (article: Article) => {
+    const message = `Are you sure you want to move "${article.title || article.name}" back to current issue?`;
+      
+    if (!confirm(message)) {
+      return;
+    }
+    
+    try {
+      const articleRef = doc(db, "articles", article.id);
+      await updateDoc(articleRef, {
+        issue: "current",
+        archiveName: null
+      });
+      
+      toast.success(`"${article.title || article.name}" has been moved back to current issue`);
+      fetchSubmissions();
+      fetchArchives();
+    } catch (error) {
+      console.error("Error reverting article from archive:", error);
+      toast.error("Failed to revert article from archive");
+    }
+  };
+
   return (
     <ProtectedRoute>
       <div className="container py-12">
@@ -732,12 +755,25 @@ export default function AdminDashboard() {
                                   <td className="px-4 py-4 whitespace-nowrap">
                                     <div className="text-sm text-[var(--foreground)]">{article.authorName}</div>
                                   </td>
-                                  <td className="px-4 py-4 whitespace-nowrap">
+                                  <td className="px-4 py-4 whitespace-nowrap space-x-2">
                                     <button
                                       onClick={() => handleDownload(article)}
                                       className="inline-flex items-center px-3 py-1 border border-transparent text-sm leading-4 font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none"
                                     >
                                       Download
+                                    </button>
+                                    <button
+                                      onClick={() => handleRevertFromArchive(article)}
+                                      className="inline-flex items-center px-3 py-1 border border-transparent text-sm leading-4 font-medium rounded-md text-white bg-yellow-600 hover:bg-yellow-700 focus:outline-none"
+                                      title="Move back to current issue"
+                                    >
+                                      Revert
+                                    </button>
+                                    <button
+                                      onClick={() => handleRejectSubmission(article)}
+                                      className="inline-flex items-center px-3 py-1 border border-transparent text-sm leading-4 font-medium rounded-md text-white bg-red-600 hover:bg-red-700 focus:outline-none"
+                                    >
+                                      Delete
                                     </button>
                                   </td>
                                 </tr>
