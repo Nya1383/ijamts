@@ -31,7 +31,7 @@ export default function ArchivesPage() {
   const [archives, setArchives] = useState<Archive[]>([]);
   const [archivedArticles, setArchivedArticles] = useState<{ [key: string]: Article[] }>({});
   const [loading, setLoading] = useState(true);
-  const [expandedArticle, setExpandedArticle] = useState<string | null>(null);
+  const [selectedArticle, setSelectedArticle] = useState<Article | null>(null);
 
   useEffect(() => {
     fetchArchives();
@@ -105,8 +105,12 @@ export default function ArchivesPage() {
     toast.success("Download started");
   };
 
-  const toggleArticleDetails = (articleId: string) => {
-    setExpandedArticle(expandedArticle === articleId ? null : articleId);
+  const handleShowDetails = (article: Article) => {
+    setSelectedArticle(article);
+  };
+
+  const handleCloseDetails = () => {
+    setSelectedArticle(null);
   };
 
   return (
@@ -152,36 +156,19 @@ export default function ArchivesPage() {
                           </div>
                           <div className="flex space-x-2">
                             <button
-                              onClick={() => toggleArticleDetails(article.id)}
-                              className="px-3 py-1 text-sm text-[var(--accent)] hover:underline"
+                              onClick={() => handleShowDetails(article)}
+                              className="px-4 py-1 bg-green-600 text-white rounded-md hover:bg-green-700 text-sm"
                             >
-                              {expandedArticle === article.id ? 'Hide Details' : 'Show Details'}
+                              Show Details
                             </button>
                             <button
                               onClick={() => handleDownload(article)}
-                              className="px-4 py-1 bg-[var(--accent)] text-white rounded-md hover:bg-opacity-90 text-sm"
+                              className="px-4 py-1 bg-blue-600 text-white rounded-md hover:bg-blue-700 text-sm"
                             >
                               Download
                             </button>
                           </div>
                         </div>
-                        
-                        {expandedArticle === article.id && (
-                          <div className="mt-4 p-4 bg-[var(--secondary-background)] rounded-md">
-                            {article.abstract && (
-                              <div className="mb-4">
-                                <h4 className="font-medium text-[var(--foreground)] mb-2">Abstract</h4>
-                                <p className="text-sm text-[var(--foreground)]">{article.abstract}</p>
-                              </div>
-                            )}
-                            {article.keywords && (
-                              <div>
-                                <h4 className="font-medium text-[var(--foreground)] mb-2">Keywords</h4>
-                                <p className="text-sm text-[var(--foreground)]">{article.keywords}</p>
-                              </div>
-                            )}
-                          </div>
-                        )}
                       </div>
                     ))}
                   </div>
@@ -195,6 +182,67 @@ export default function ArchivesPage() {
           </div>
         )}
       </div>
+
+      {/* Article Details Modal */}
+      {selectedArticle && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-[var(--background)] p-6 rounded-lg w-full max-w-2xl mx-auto my-auto transform -translate-y-0">
+            <div className="flex justify-between items-start mb-4">
+              <h2 className="text-xl font-bold text-[var(--foreground)]">
+                {selectedArticle.title || selectedArticle.name}
+              </h2>
+              <button
+                onClick={handleCloseDetails}
+                className="text-[var(--secondary-text)] hover:text-[var(--foreground)]"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+            
+            <div className="space-y-4">
+              {selectedArticle.abstract && (
+                <div>
+                  <h3 className="font-medium text-[var(--foreground)] mb-2">Abstract</h3>
+                  <p className="text-[var(--foreground)]">{selectedArticle.abstract}</p>
+                </div>
+              )}
+              
+              {selectedArticle.keywords && (
+                <div>
+                  <h3 className="font-medium text-[var(--foreground)] mb-2">Keywords</h3>
+                  <p className="text-[var(--foreground)]">{selectedArticle.keywords}</p>
+                </div>
+              )}
+              
+              <div className="flex justify-between items-center mt-6 pt-4 border-t border-[var(--border)]">
+                <div className="text-sm text-[var(--secondary-text)]">
+                  Published on {selectedArticle.timestamp.toLocaleDateString()}
+                </div>
+                <div className="text-sm text-[var(--secondary-text)]">
+                  By {selectedArticle.authorName}
+                </div>
+              </div>
+              
+              <div className="flex justify-end space-x-2 mt-4">
+                <button
+                  onClick={handleCloseDetails}
+                  className="px-4 py-2 border rounded-md hover:bg-[var(--secondary-background)]"
+                >
+                  Close
+                </button>
+                <button
+                  onClick={() => handleDownload(selectedArticle)}
+                  className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+                >
+                  Download
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 } 
