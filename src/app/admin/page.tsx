@@ -61,6 +61,8 @@ export default function AdminDashboard() {
     keywords: ''
   });
   const [expandedArticle, setExpandedArticle] = useState<string | null>(null);
+  const [currentIssueTitle, setCurrentIssueTitle] = useState("");
+  const [isEditingTitle, setIsEditingTitle] = useState(false);
   const { user, signOut } = useAuth();
   const router = useRouter();
 
@@ -94,6 +96,8 @@ export default function AdminDashboard() {
       debugStorageConfig();
       // Fetch submissions
       fetchSubmissions();
+      // Fetch current issue title
+      fetchCurrentIssueTitle();
     }
   }, [user]);
 
@@ -162,6 +166,41 @@ export default function AdminDashboard() {
       toast.error("Failed to load submissions");
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchCurrentIssueTitle = async () => {
+    try {
+      const titleDoc = await getDocs(collection(db, "currentIssue"));
+      if (!titleDoc.empty) {
+        setCurrentIssueTitle(titleDoc.docs[0].data().title || "");
+      }
+    } catch (error) {
+      console.error("Error fetching current issue title:", error);
+      toast.error("Failed to load current issue title");
+    }
+  };
+
+  const handleUpdateIssueTitle = async () => {
+    try {
+      const titleRef = collection(db, "currentIssue");
+      const titleDoc = await getDocs(titleRef);
+      
+      if (titleDoc.empty) {
+        // Create new document if it doesn't exist
+        await addDoc(titleRef, { title: currentIssueTitle });
+      } else {
+        // Update existing document
+        await updateDoc(doc(db, "currentIssue", titleDoc.docs[0].id), {
+          title: currentIssueTitle
+        });
+      }
+      
+      setIsEditingTitle(false);
+      toast.success("Current issue title updated successfully");
+    } catch (error) {
+      console.error("Error updating current issue title:", error);
+      toast.error("Failed to update current issue title");
     }
   };
 
@@ -430,6 +469,44 @@ export default function AdminDashboard() {
             >
               Sign Out
             </button>
+          </div>
+          
+          {/* Current Issue Title Section */}
+          <div className="mb-8 bg-[var(--background)] shadow-md rounded-lg border border-[var(--border)] p-6">
+            <h2 className="text-xl font-bold mb-4 text-[var(--foreground)]">Current Issue Title</h2>
+            {isEditingTitle ? (
+              <div className="flex gap-4">
+                <input
+                  type="text"
+                  value={currentIssueTitle}
+                  onChange={(e) => setCurrentIssueTitle(e.target.value)}
+                  className="flex-1 px-4 py-2 border rounded-md bg-[var(--secondary-background)] text-[var(--foreground)]"
+                  placeholder="Enter current issue title"
+                />
+                <button
+                  onClick={handleUpdateIssueTitle}
+                  className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700"
+                >
+                  Save
+                </button>
+                <button
+                  onClick={() => setIsEditingTitle(false)}
+                  className="px-4 py-2 border rounded-md hover:bg-[var(--secondary-background)]"
+                >
+                  Cancel
+                </button>
+              </div>
+            ) : (
+              <div className="flex justify-between items-center">
+                <p className="text-[var(--foreground)]">{currentIssueTitle || "No title set"}</p>
+                <button
+                  onClick={() => setIsEditingTitle(true)}
+                  className="px-4 py-2 bg-[var(--accent)] text-white rounded-md hover:bg-opacity-90"
+                >
+                  Edit Title
+                </button>
+              </div>
+            )}
           </div>
           
           {/* Tabs */}

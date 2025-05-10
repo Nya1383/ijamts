@@ -25,10 +25,24 @@ export default function CurrentIssue() {
   const [articles, setArticles] = useState<Article[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedArticle, setSelectedArticle] = useState<Article | null>(null);
+  const [currentIssueTitle, setCurrentIssueTitle] = useState("");
 
   useEffect(() => {
     fetchArticles();
+    fetchCurrentIssueTitle();
   }, []);
+
+  const fetchCurrentIssueTitle = async () => {
+    try {
+      const titleDoc = await getDocs(collection(db, "currentIssue"));
+      if (!titleDoc.empty) {
+        setCurrentIssueTitle(titleDoc.docs[0].data().title || "");
+      }
+    } catch (error) {
+      console.error("Error fetching current issue title:", error);
+      toast.error("Failed to load current issue title");
+    }
+  };
 
   const fetchArticles = async () => {
     try {
@@ -98,7 +112,9 @@ export default function CurrentIssue() {
       <Toaster position="top-right" />
       <div className="max-w-6xl mx-auto">
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-[var(--foreground)]">Current Issue</h1>
+          <h1 className="text-3xl font-bold text-[var(--foreground)]">
+            {currentIssueTitle || "Current Issue"}
+          </h1>
           <p className="mt-2 text-[var(--secondary-text)]">
             Latest approved articles in the current issue
           </p>
@@ -138,7 +154,7 @@ export default function CurrentIssue() {
                   {articles.map((article) => (
                     <tr key={article.id}>
                       <td className="px-4 py-4 whitespace-nowrap">
-                        <div className="text-sm font-medium text-[var(--foreground)]">{article.name}</div>
+                        <div className="text-sm font-medium text-[var(--foreground)]">{article.title || article.name}</div>
                         <div className="text-xs text-[var(--secondary-text)]">{article.fileType}</div>
                       </td>
                       <td className="px-4 py-4 whitespace-nowrap">
