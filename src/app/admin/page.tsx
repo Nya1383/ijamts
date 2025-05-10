@@ -72,9 +72,6 @@ export default function AdminDashboard() {
     title: '',
     abstract: '',
     keywords: '',
-    conferenceName: '',
-    conferenceDate: '',
-    conferenceLocation: ''
   });
   const [expandedArticle, setExpandedArticle] = useState<string | null>(null);
   const [currentIssueTitle, setCurrentIssueTitle] = useState("");
@@ -236,9 +233,6 @@ export default function AdminDashboard() {
       title: '',
       abstract: '',
       keywords: '',
-      conferenceName: '',
-      conferenceDate: '',
-      conferenceLocation: ''
     });
     setShowApprovalModal(true);
   };
@@ -252,17 +246,14 @@ export default function AdminDashboard() {
       // Update article with approval details
       await updateDoc(articleRef, {
         status: "approved",
-        issue: "proceedings",
+        issue: "current",
         approvedDate: new Date(),
         title: approvalDetails.title,
         abstract: approvalDetails.abstract,
-        keywords: approvalDetails.keywords,
-        conferenceName: approvalDetails.conferenceName,
-        conferenceDate: approvalDetails.conferenceDate,
-        conferenceLocation: approvalDetails.conferenceLocation
+        keywords: approvalDetails.keywords
       });
       
-      toast.success(`"${selectedArticle.name}" has been approved and added to conference proceedings`);
+      toast.success(`"${selectedArticle.name}" has been approved and added to current issue`);
       setShowApprovalModal(false);
       
       // Refresh submissions list
@@ -308,7 +299,7 @@ export default function AdminDashboard() {
   };
 
   const handleRevertToPending = async (article: Article) => {
-    const message = `Are you sure you want to move "${article.name}" back to pending submissions?`;
+    const message = `Are you sure you want to move "${article.title || article.name}" back to pending submissions?`;
       
     if (!confirm(message)) {
       return;
@@ -321,10 +312,13 @@ export default function AdminDashboard() {
       await updateDoc(articleRef, {
         status: "pending",
         issue: null,
-        approvedDate: null
+        approvedDate: null,
+        title: null,
+        abstract: null,
+        keywords: null
       });
       
-      toast.success(`"${article.name}" has been moved back to pending submissions`);
+      toast.success(`"${article.title || article.name}" has been moved back to pending submissions`);
       
       // Refresh submissions list
       fetchSubmissions();
@@ -456,16 +450,21 @@ export default function AdminDashboard() {
                         Download
                       </button>
                       <button
-                        onClick={() => handleRevertToPending(article)}
+                        onClick={() => handleMoveToArchiveClick(article)}
                         className="inline-flex items-center px-3 py-1 border border-transparent text-sm leading-4 font-medium rounded-md text-white bg-yellow-600 hover:bg-yellow-700 focus:outline-none"
+                      >
+                        Move to Archive
+                      </button>
+                      <button
+                        onClick={() => handleRevertToPending(article)}
+                        className="inline-flex items-center px-3 py-1 border border-transparent text-sm leading-4 font-medium rounded-md text-white bg-purple-600 hover:bg-purple-700 focus:outline-none"
                         title="Move back to pending submissions"
                       >
-                        Revert
+                        Revert to Pending
                       </button>
                       <button
                         onClick={() => handleRejectSubmission(article)}
                         className="inline-flex items-center px-3 py-1 border border-transparent text-sm leading-4 font-medium rounded-md text-white bg-red-600 hover:bg-red-700 focus:outline-none"
-                        title="Permanently delete this submission"
                       >
                         Delete
                       </button>
@@ -610,6 +609,41 @@ export default function AdminDashboard() {
     }
   };
 
+  const handleDeleteArchive = async (archive: Archive) => {
+    const message = `Are you sure you want to delete the archive "${archive.name}"? This will also remove all articles in this archive.`;
+      
+    if (!confirm(message)) {
+      return;
+    }
+    
+    try {
+      // First, get all articles in this archive
+      const articlesRef = collection(db, "articles");
+      const articlesSnapshot = await getDocs(articlesRef);
+      
+      // Update all articles in this archive to remove archiveName
+      const updatePromises = articlesSnapshot.docs
+        .filter(doc => doc.data().archiveName === archive.name)
+        .map(doc => updateDoc(doc.ref, {
+          archiveName: null,
+          issue: "current" // Move articles back to current issue
+        }));
+      
+      // Delete the archive document
+      const deletePromise = deleteDoc(doc(db, "archives", archive.id));
+      
+      // Execute all updates and delete
+      await Promise.all([...updatePromises, deletePromise]);
+      
+      toast.success(`Archive "${archive.name}" has been deleted and its articles moved to current issue`);
+      fetchSubmissions();
+      fetchArchives();
+    } catch (error) {
+      console.error("Error deleting archive:", error);
+      toast.error("Failed to delete archive");
+    }
+  };
+
   return (
     <ProtectedRoute>
       <div className="container py-12">
@@ -724,10 +758,21 @@ export default function AdminDashboard() {
                   {archives.map((archive) => (
                     <div key={archive.id} className="bg-[var(--background)] shadow-md rounded-lg border border-[var(--border)] overflow-hidden">
                       <div className="p-4 border-b border-[var(--border)]">
-                        <h3 className="text-lg font-semibold text-[var(--foreground)]">{archive.name}</h3>
-                        <p className="text-sm text-[var(--secondary-text)]">
-                          Created on {archive.createdAt.toLocaleDateString()}
-                        </p>
+                        <div className="flex justify-between items-start">
+                          <div>
+                            <h3 className="text-lg font-semibold text-[var(--foreground)]">{archive.name}</h3>
+                            <p className="text-sm text-[var(--secondary-text)]">
+                              Created on {archive.createdAt.toLocaleDateString()}
+                            </p>
+                          </div>
+                          <button
+                            onClick={() => handleDeleteArchive(archive)}
+                            className="px-3 py-1 text-sm text-red-600 hover:text-red-700 hover:underline"
+                            title="Delete archive and move articles to current issue"
+                          >
+                            Delete Archive
+                          </button>
+                        </div>
                       </div>
                       {archivedArticles[archive.name]?.length > 0 ? (
                         <div className="overflow-x-auto">
@@ -841,6 +886,13 @@ export default function AdminDashboard() {
                               Move to Archive
                             </button>
                             <button
+                              onClick={() => handleRevertToPending(article)}
+                              className="inline-flex items-center px-3 py-1 border border-transparent text-sm leading-4 font-medium rounded-md text-white bg-purple-600 hover:bg-purple-700 focus:outline-none"
+                              title="Move back to pending submissions"
+                            >
+                              Revert to Pending
+                            </button>
+                            <button
                               onClick={() => handleRejectSubmission(article)}
                               className="inline-flex items-center px-3 py-1 border border-transparent text-sm leading-4 font-medium rounded-md text-white bg-red-600 hover:bg-red-700 focus:outline-none"
                             >
@@ -902,36 +954,6 @@ export default function AdminDashboard() {
                     required
                   />
                 </div>
-                <div>
-                  <label className="block text-sm font-medium mb-1">Conference Name</label>
-                  <input
-                    type="text"
-                    value={approvalDetails.conferenceName}
-                    onChange={(e) => setApprovalDetails(prev => ({ ...prev, conferenceName: e.target.value }))}
-                    className="w-full p-2 border rounded-md bg-[var(--secondary-background)]"
-                    required
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium mb-1">Conference Date</label>
-                  <input
-                    type="date"
-                    value={approvalDetails.conferenceDate}
-                    onChange={(e) => setApprovalDetails(prev => ({ ...prev, conferenceDate: e.target.value }))}
-                    className="w-full p-2 border rounded-md bg-[var(--secondary-background)]"
-                    required
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium mb-1">Conference Location</label>
-                  <input
-                    type="text"
-                    value={approvalDetails.conferenceLocation}
-                    onChange={(e) => setApprovalDetails(prev => ({ ...prev, conferenceLocation: e.target.value }))}
-                    className="w-full p-2 border rounded-md bg-[var(--secondary-background)]"
-                    required
-                  />
-                </div>
                 <div className="flex justify-end space-x-2 mt-4">
                   <button
                     onClick={() => setShowApprovalModal(false)}
@@ -942,8 +964,7 @@ export default function AdminDashboard() {
                   <button
                     onClick={handleApproveSubmission}
                     className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700"
-                    disabled={!approvalDetails.title || !approvalDetails.abstract || !approvalDetails.keywords || 
-                             !approvalDetails.conferenceName || !approvalDetails.conferenceDate || !approvalDetails.conferenceLocation}
+                    disabled={!approvalDetails.title || !approvalDetails.abstract || !approvalDetails.keywords}
                   >
                     Approve
                   </button>
