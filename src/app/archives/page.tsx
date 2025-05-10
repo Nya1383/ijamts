@@ -132,7 +132,7 @@ export default function ArchivesPage() {
             {archives.map((archive) => (
               <div key={archive.id} className="bg-[var(--background)] shadow-md rounded-lg border border-[var(--border)] overflow-hidden">
                 <div className="p-6 border-b border-[var(--border)]">
-                  <h2 className="text-2xl font-bold text-[var(--foreground)]">{archive.name}</h2>
+                  <h2 className="text-lg font-semibold text-[var(--foreground)]">{archive.name}</h2>
                   <p className="text-sm text-[var(--secondary-text)] mt-1">
                     Created on {archive.createdAt.toLocaleDateString()}
                   </p>
