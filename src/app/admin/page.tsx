@@ -58,7 +58,10 @@ export default function AdminDashboard() {
   const [approvalDetails, setApprovalDetails] = useState({
     title: '',
     abstract: '',
-    keywords: ''
+    keywords: '',
+    conferenceName: '',
+    conferenceDate: '',
+    conferenceLocation: ''
   });
   const [expandedArticle, setExpandedArticle] = useState<string | null>(null);
   const [currentIssueTitle, setCurrentIssueTitle] = useState("");
@@ -217,7 +220,10 @@ export default function AdminDashboard() {
     setApprovalDetails({
       title: '',
       abstract: '',
-      keywords: ''
+      keywords: '',
+      conferenceName: '',
+      conferenceDate: '',
+      conferenceLocation: ''
     });
     setShowApprovalModal(true);
   };
@@ -231,14 +237,17 @@ export default function AdminDashboard() {
       // Update article with approval details
       await updateDoc(articleRef, {
         status: "approved",
-        issue: "current",
+        issue: "proceedings",
         approvedDate: new Date(),
         title: approvalDetails.title,
         abstract: approvalDetails.abstract,
-        keywords: approvalDetails.keywords
+        keywords: approvalDetails.keywords,
+        conferenceName: approvalDetails.conferenceName,
+        conferenceDate: approvalDetails.conferenceDate,
+        conferenceLocation: approvalDetails.conferenceLocation
       });
       
-      toast.success(`"${selectedArticle.name}" has been approved and added to current issue`);
+      toast.success(`"${selectedArticle.name}" has been approved and added to conference proceedings`);
       setShowApprovalModal(false);
       
       // Refresh submissions list
@@ -591,6 +600,36 @@ export default function AdminDashboard() {
                     required
                   />
                 </div>
+                <div>
+                  <label className="block text-sm font-medium mb-1">Conference Name</label>
+                  <input
+                    type="text"
+                    value={approvalDetails.conferenceName}
+                    onChange={(e) => setApprovalDetails(prev => ({ ...prev, conferenceName: e.target.value }))}
+                    className="w-full p-2 border rounded-md bg-[var(--secondary-background)]"
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-1">Conference Date</label>
+                  <input
+                    type="date"
+                    value={approvalDetails.conferenceDate}
+                    onChange={(e) => setApprovalDetails(prev => ({ ...prev, conferenceDate: e.target.value }))}
+                    className="w-full p-2 border rounded-md bg-[var(--secondary-background)]"
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-1">Conference Location</label>
+                  <input
+                    type="text"
+                    value={approvalDetails.conferenceLocation}
+                    onChange={(e) => setApprovalDetails(prev => ({ ...prev, conferenceLocation: e.target.value }))}
+                    className="w-full p-2 border rounded-md bg-[var(--secondary-background)]"
+                    required
+                  />
+                </div>
                 <div className="flex justify-end space-x-2 mt-4">
                   <button
                     onClick={() => setShowApprovalModal(false)}
@@ -601,7 +640,8 @@ export default function AdminDashboard() {
                   <button
                     onClick={handleApproveSubmission}
                     className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700"
-                    disabled={!approvalDetails.title || !approvalDetails.abstract || !approvalDetails.keywords}
+                    disabled={!approvalDetails.title || !approvalDetails.abstract || !approvalDetails.keywords || 
+                             !approvalDetails.conferenceName || !approvalDetails.conferenceDate || !approvalDetails.conferenceLocation}
                   >
                     Approve
                   </button>
