@@ -6,18 +6,16 @@ export default function MainContent() {
         <h2 className="text-2xl font-bold text-[var(--foreground)] mb-4">About the Journal</h2>
         <div className="bg-[var(--background)] rounded-lg shadow-sm p-6 border border-[var(--border)]">
           <p className="mb-4 text-[var(--secondary-text)]">
-            The International Journal of Advances in Management, Technology and Science (IJAMTS) is a peer-reviewed, open-access journal
-            that publishes original research articles, review papers, short communications, and technical notes in all
-            areas of science, engineering, and technology.
+          The International Journal of Advances in Management, Technology, and Science (IJAMTS) is a peer-reviewed, open access, international journal published monthly. The journal's goal is to encourage creative research in a variety of areas that bridges the gap between prior and advanced ideas
           </p>
           <p className="mb-4 text-[var(--secondary-text)]">
-            Founded in 2015, IJAMTS has established itself as a platform for researchers, academics, and industry
-            professionals to share their findings and innovations. The journal maintains a rigorous peer-review process
-            to ensure the quality and validity of published work.
+          IJAMTS encourages writers to submit unique and unpublished material in the form of written reviews, brief messages, and notes dealing with a variety of fields that present current research. It features a global editorial board made up of accomplished academics and researchers. The primary goal of IJAMTS is to disseminate new knowledge and technology in order to advance academic and research experts in many study areas. The magazine also welcomes properly written reviews, brief messages, and remarks on the many subjects covered by the fields. We accept longer versions of works that have previously appeared in conferences and/or publications.
           </p>
           <p className="text-[var(--secondary-text)]">
-            IJAMTS is published quarterly (March, June, September, and December) and accepts submissions year-round from
-            researchers worldwide.
+          Frequency: 12 Issues per Year
+          </p>
+          <p className="text-[var(--secondary-text)]">
+          Accepted Language: English
           </p>
         </div>
       </section>
