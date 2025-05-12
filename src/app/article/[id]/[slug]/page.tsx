@@ -123,9 +123,13 @@ export default function ArticlePage() {
             {/* Abstract */}
             <div className="space-y-2">
               <h2 className="text-xl font-semibold text-[var(--foreground)]">Abstract</h2>
-              <p className="text-[var(--secondary-text)] whitespace-pre-wrap">
-                {article.abstract}
-              </p>
+              <div className="text-[var(--secondary-text)]">
+                {article.abstract?.split('\n\n').map((paragraph, index) => (
+                  <p key={index} className="mb-4 leading-relaxed">
+                    {paragraph}
+                  </p>
+                ))}
+              </div>
             </div>
 
             {/* Keywords */}

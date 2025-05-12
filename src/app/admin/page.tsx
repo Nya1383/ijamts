@@ -426,12 +426,6 @@ export default function AdminDashboard() {
                       >
                         Approve
                       </button>
-                      <button
-                        onClick={() => handleRejectSubmission(article)}
-                        className="inline-flex items-center px-3 py-1 border border-transparent text-sm leading-4 font-medium rounded-md text-white bg-red-600 hover:bg-red-700 focus:outline-none"
-                      >
-                        Reject
-                      </button>
                     </>
                   ) : (
                     <>
@@ -453,12 +447,6 @@ export default function AdminDashboard() {
                         title="Move back to pending submissions"
                       >
                         Revert to Pending
-                      </button>
-                      <button
-                        onClick={() => handleRejectSubmission(article)}
-                        className="inline-flex items-center px-3 py-1 border border-transparent text-sm leading-4 font-medium rounded-md text-white bg-red-600 hover:bg-red-700 focus:outline-none"
-                      >
-                        Delete
                       </button>
                     </>
                   )}
@@ -806,12 +794,6 @@ export default function AdminDashboard() {
                                     >
                                       Revert
                                     </button>
-                                    <button
-                                      onClick={() => handleRejectSubmission(article)}
-                                      className="inline-flex items-center px-3 py-1 border border-transparent text-sm leading-4 font-medium rounded-md text-white bg-red-600 hover:bg-red-700 focus:outline-none"
-                                    >
-                                      Delete
-                                    </button>
                                   </td>
                                 </tr>
                               ))}
@@ -883,12 +865,6 @@ export default function AdminDashboard() {
                               title="Move back to pending submissions"
                             >
                               Revert to Pending
-                            </button>
-                            <button
-                              onClick={() => handleRejectSubmission(article)}
-                              className="inline-flex items-center px-3 py-1 border border-transparent text-sm leading-4 font-medium rounded-md text-white bg-red-600 hover:bg-red-700 focus:outline-none"
-                            >
-                              Delete
                             </button>
                           </td>
                         </tr>
