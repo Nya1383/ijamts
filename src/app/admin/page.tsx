@@ -229,11 +229,6 @@ export default function AdminDashboard() {
 
   const handleApproveClick = (article: Article) => {
     setSelectedArticle(article);
-    setApprovalDetails({
-      title: '',
-      abstract: '',
-      keywords: '',
-    });
     setShowApprovalModal(true);
   };
 
@@ -243,17 +238,14 @@ export default function AdminDashboard() {
     try {
       const articleRef = doc(db, "articles", selectedArticle.id);
       
-      // Update article with approval details
+      // Update article status to approved
       await updateDoc(articleRef, {
         status: "approved",
         issue: "current",
-        approvedDate: new Date(),
-        title: approvalDetails.title,
-        abstract: approvalDetails.abstract,
-        keywords: approvalDetails.keywords
+        approvedDate: new Date()
       });
       
-      toast.success(`"${selectedArticle.name}" has been approved and added to current issue`);
+      toast.success(`"${selectedArticle.title || selectedArticle.name}" has been approved and added to current issue`);
       setShowApprovalModal(false);
       
       // Refresh submissions list
@@ -921,54 +913,24 @@ export default function AdminDashboard() {
         
         {showApprovalModal && selectedArticle && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-            <div className="bg-[var(--background)] p-6 rounded-lg w-full max-w-2xl">
-              <h2 className="text-xl font-bold mb-4">Approve Article</h2>
-              <div className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium mb-1">Title</label>
-                  <input
-                    type="text"
-                    value={approvalDetails.title}
-                    onChange={(e) => setApprovalDetails(prev => ({ ...prev, title: e.target.value }))}
-                    className="w-full p-2 border rounded-md bg-[var(--secondary-background)]"
-                    required
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium mb-1">Abstract</label>
-                  <textarea
-                    value={approvalDetails.abstract}
-                    onChange={(e) => setApprovalDetails(prev => ({ ...prev, abstract: e.target.value }))}
-                    className="w-full p-2 border rounded-md bg-[var(--secondary-background)] h-32"
-                    required
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium mb-1">Keywords</label>
-                  <input
-                    type="text"
-                    value={approvalDetails.keywords}
-                    onChange={(e) => setApprovalDetails(prev => ({ ...prev, keywords: e.target.value }))}
-                    className="w-full p-2 border rounded-md bg-[var(--secondary-background)]"
-                    placeholder="Separate keywords with commas"
-                    required
-                  />
-                </div>
-                <div className="flex justify-end space-x-2 mt-4">
-                  <button
-                    onClick={() => setShowApprovalModal(false)}
-                    className="px-4 py-2 border rounded-md hover:bg-[var(--secondary-background)]"
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    onClick={handleApproveSubmission}
-                    className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700"
-                    disabled={!approvalDetails.title || !approvalDetails.abstract || !approvalDetails.keywords}
-                  >
-                    Approve
-                  </button>
-                </div>
+            <div className="bg-[var(--background)] rounded-lg p-6 max-w-2xl w-full mx-4">
+              <h3 className="text-xl font-bold mb-4">Approve Submission</h3>
+              <p className="mb-4 text-[var(--secondary-text)]">
+                Are you sure you want to approve this submission? The article will be added to the current issue.
+              </p>
+              <div className="flex justify-end space-x-2">
+                <button
+                  onClick={() => setShowApprovalModal(false)}
+                  className="px-4 py-2 border rounded-md hover:bg-[var(--secondary-background)]"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleApproveSubmission}
+                  className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700"
+                >
+                  Approve
+                </button>
               </div>
             </div>
           </div>

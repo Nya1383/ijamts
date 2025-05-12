@@ -8,6 +8,9 @@ import { toast, Toaster } from "react-hot-toast";
 
 export default function FileUpload() {
   const [authorName, setAuthorName] = useState("");
+  const [title, setTitle] = useState("");
+  const [abstract, setAbstract] = useState("");
+  const [keywords, setKeywords] = useState("");
   const [articleFile, setArticleFile] = useState<File | null>(null);
   const [undertakingFile, setUndertakingFile] = useState<File | null>(null);
   const [uploading, setUploading] = useState(false);
@@ -49,8 +52,8 @@ export default function FileUpload() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!articleFile || !undertakingFile || !authorName.trim()) {
-      toast.error("Please provide your name, article file, and undertaking form");
+    if (!articleFile || !undertakingFile || !authorName.trim() || !title.trim() || !abstract.trim() || !keywords.trim()) {
+      toast.error("Please fill in all required fields and upload both files");
       return;
     }
     
@@ -77,6 +80,9 @@ export default function FileUpload() {
       const articleDoc = await addDoc(collection(db, "articles"), {
         name: articleFile.name,
         authorName: authorName,
+        title: title,
+        abstract: abstract,
+        keywords: keywords,
         downloadURL: articleDownloadURL,
         timestamp: new Date(),
         fileType: articleFileExtension,
@@ -106,6 +112,9 @@ export default function FileUpload() {
       setArticleFile(null);
       setUndertakingFile(null);
       setAuthorName("");
+      setTitle("");
+      setAbstract("");
+      setKeywords("");
       if (articleFileInputRef.current) {
         articleFileInputRef.current.value = "";
       }
@@ -138,6 +147,50 @@ export default function FileUpload() {
               onChange={(e) => setAuthorName(e.target.value)}
               className="w-full px-4 py-2 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               placeholder="Enter your full name"
+              required
+            />
+          </div>
+
+          <div>
+            <label htmlFor="title" className="block text-sm font-medium mb-1">
+              Article Title
+            </label>
+            <input
+              type="text"
+              id="title"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              className="w-full px-4 py-2 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              placeholder="Enter the title of your article"
+              required
+            />
+          </div>
+
+          <div>
+            <label htmlFor="abstract" className="block text-sm font-medium mb-1">
+              Abstract
+            </label>
+            <textarea
+              id="abstract"
+              value={abstract}
+              onChange={(e) => setAbstract(e.target.value)}
+              className="w-full px-4 py-2 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent h-32"
+              placeholder="Enter the abstract of your article"
+              required
+            />
+          </div>
+
+          <div>
+            <label htmlFor="keywords" className="block text-sm font-medium mb-1">
+              Keywords
+            </label>
+            <input
+              type="text"
+              id="keywords"
+              value={keywords}
+              onChange={(e) => setKeywords(e.target.value)}
+              className="w-full px-4 py-2 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              placeholder="Enter keywords separated by commas"
               required
             />
           </div>

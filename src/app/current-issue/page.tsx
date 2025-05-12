@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { db } from "../../../lib/firebase";
 import { collection, getDocs, query, orderBy } from "firebase/firestore";
 import { toast, Toaster } from "react-hot-toast";
+import Link from "next/link";
 
 type Article = {
   id: string;
@@ -25,6 +26,7 @@ export default function CurrentIssue() {
   const [articles, setArticles] = useState<Article[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedArticle, setSelectedArticle] = useState<Article | null>(null);
+  const [showDetails, setShowDetails] = useState(false);
   const [currentIssueTitle, setCurrentIssueTitle] = useState("");
 
   useEffect(() => {
@@ -166,20 +168,18 @@ export default function CurrentIssue() {
                         </div>
                       </td>
                       <td className="px-4 py-4 whitespace-nowrap space-x-2">
+                        <Link
+                          href={`/article/${article.id}`}
+                          className="inline-flex items-center px-3 py-1 border border-transparent text-sm leading-4 font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none"
+                        >
+                          View Details
+                        </Link>
                         <button
                           onClick={() => handleDownload(article)}
                           className="inline-flex items-center px-3 py-1 border border-transparent text-sm leading-4 font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none"
                         >
                           Download
                         </button>
-                        {article.title && (
-                          <button
-                            onClick={() => handleShowDetails(article)}
-                            className="inline-flex items-center px-3 py-1 border border-transparent text-sm leading-4 font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none"
-                          >
-                            Show Details
-                          </button>
-                        )}
                       </td>
                     </tr>
                   ))}

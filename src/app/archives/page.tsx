@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { db } from "../../../lib/firebase";
 import { collection, getDocs } from "firebase/firestore";
 import { toast, Toaster } from "react-hot-toast";
+import Link from "next/link";
 
 type Article = {
   id: string;
@@ -32,6 +33,7 @@ export default function ArchivesPage() {
   const [archivedArticles, setArchivedArticles] = useState<{ [key: string]: Article[] }>({});
   const [loading, setLoading] = useState(true);
   const [selectedArticle, setSelectedArticle] = useState<Article | null>(null);
+  const [showDetails, setShowDetails] = useState(false);
 
   useEffect(() => {
     fetchArchives();
@@ -117,7 +119,7 @@ export default function ArchivesPage() {
     <div className="container py-12">
       <Toaster position="top-right" />
       <div className="max-w-6xl mx-auto">
-        <h1 className="text-3xl font-bold text-[var(--foreground)] mb-8">Archives</h1>
+        <h1 className="text-3xl font-bold mb-8 text-[var(--foreground)]">Archives</h1>
         
         {loading ? (
           <div className="flex justify-center py-12">
@@ -131,50 +133,69 @@ export default function ArchivesPage() {
           <div className="space-y-8">
             {archives.map((archive) => (
               <div key={archive.id} className="bg-[var(--background)] shadow-md rounded-lg border border-[var(--border)] overflow-hidden">
-                <div className="p-6 border-b border-[var(--border)]">
-                  <h2 className="text-lg font-semibold text-[var(--foreground)]">{archive.name}</h2>
-                  <p className="text-sm text-[var(--secondary-text)] mt-1">
+                <div className="p-4 border-b border-[var(--border)]">
+                  <h2 className="text-xl font-semibold text-[var(--foreground)]">{archive.name}</h2>
+                  <p className="text-sm text-[var(--secondary-text)]">
                     Created on {archive.createdAt.toLocaleDateString()}
                   </p>
                 </div>
                 
                 {archivedArticles[archive.name]?.length > 0 ? (
-                  <div className="divide-y divide-[var(--border)]">
-                    {archivedArticles[archive.name].map((article) => (
-                      <div key={article.id} className="p-6">
-                        <div className="flex justify-between items-start">
-                          <div>
-                            <h3 className="text-lg font-semibold text-[var(--foreground)]">
-                              {article.title || article.name}
-                            </h3>
-                            <p className="text-sm text-[var(--secondary-text)] mt-1">
-                              By {article.authorName}
-                            </p>
-                            <p className="text-sm text-[var(--secondary-text)]">
-                              Published on {article.timestamp.toLocaleDateString()}
-                            </p>
-                          </div>
-                          <div className="flex space-x-2">
-                            <button
-                              onClick={() => handleShowDetails(article)}
-                              className="px-4 py-1 bg-green-600 text-white rounded-md hover:bg-green-700 text-sm"
-                            >
-                              Show Details
-                            </button>
-                            <button
-                              onClick={() => handleDownload(article)}
-                              className="px-4 py-1 bg-blue-600 text-white rounded-md hover:bg-blue-700 text-sm"
-                            >
-                              Download
-                            </button>
-                          </div>
-                        </div>
-                      </div>
-                    ))}
+                  <div className="overflow-x-auto">
+                    <table className="min-w-full divide-y divide-[var(--border)]">
+                      <thead>
+                        <tr>
+                          <th className="px-4 py-3 text-left text-xs font-medium text-[var(--secondary-text)] uppercase tracking-wider">
+                            Article
+                          </th>
+                          <th className="px-4 py-3 text-left text-xs font-medium text-[var(--secondary-text)] uppercase tracking-wider">
+                            Author
+                          </th>
+                          <th className="px-4 py-3 text-left text-xs font-medium text-[var(--secondary-text)] uppercase tracking-wider">
+                            Date Published
+                          </th>
+                          <th className="px-4 py-3 text-left text-xs font-medium text-[var(--secondary-text)] uppercase tracking-wider">
+                            Actions
+                          </th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-[var(--border)]">
+                        {archivedArticles[archive.name].map((article) => (
+                          <tr key={article.id}>
+                            <td className="px-4 py-4 whitespace-nowrap">
+                              <div className="text-sm font-medium text-[var(--foreground)]">{article.title || article.name}</div>
+                              <div className="text-xs text-[var(--secondary-text)]">{article.fileType}</div>
+                            </td>
+                            <td className="px-4 py-4 whitespace-nowrap">
+                              <div className="text-sm text-[var(--foreground)]">{article.authorName}</div>
+                            </td>
+                            <td className="px-4 py-4 whitespace-nowrap">
+                              <div className="text-sm text-[var(--foreground)]">
+                                {article.timestamp.toLocaleDateString()}
+                              </div>
+                            </td>
+                            <td className="px-4 py-4 whitespace-nowrap space-x-2">
+                              <Link
+                                href={`/article/${article.id}`}
+                                className="inline-flex items-center px-3 py-1 border border-transparent text-sm leading-4 font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none"
+                              >
+                                View Details
+                              </Link>
+                              <button
+                                onClick={() => handleDownload(article)}
+                                className="inline-flex items-center px-3 py-1 border border-transparent text-sm leading-4 font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none"
+                              >
+                                Download
+                              </button>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
                   </div>
                 ) : (
-                  <div className="p-6 text-center text-[var(--secondary-text)]">
-                    No articles in this archive yet.
+                  <div className="p-4 text-center text-[var(--secondary-text)]">
+                    No articles in this archive.
                   </div>
                 )}
               </div>
@@ -182,67 +203,6 @@ export default function ArchivesPage() {
           </div>
         )}
       </div>
-
-      {/* Article Details Modal */}
-      {selectedArticle && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-[var(--background)] p-6 rounded-lg w-full max-w-2xl mx-auto my-auto transform -translate-y-0">
-            <div className="flex justify-between items-start mb-4">
-              <h2 className="text-xl font-bold text-[var(--foreground)]">
-                {selectedArticle.title || selectedArticle.name}
-              </h2>
-              <button
-                onClick={handleCloseDetails}
-                className="text-[var(--secondary-text)] hover:text-[var(--foreground)]"
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                </svg>
-              </button>
-            </div>
-            
-            <div className="space-y-4">
-              {selectedArticle.abstract && (
-                <div>
-                  <h3 className="font-medium text-[var(--foreground)] mb-2">Abstract</h3>
-                  <p className="text-[var(--foreground)]">{selectedArticle.abstract}</p>
-                </div>
-              )}
-              
-              {selectedArticle.keywords && (
-                <div>
-                  <h3 className="font-medium text-[var(--foreground)] mb-2">Keywords</h3>
-                  <p className="text-[var(--foreground)]">{selectedArticle.keywords}</p>
-                </div>
-              )}
-              
-              <div className="flex justify-between items-center mt-6 pt-4 border-t border-[var(--border)]">
-                <div className="text-sm text-[var(--secondary-text)]">
-                  Published on {selectedArticle.timestamp.toLocaleDateString()}
-                </div>
-                <div className="text-sm text-[var(--secondary-text)]">
-                  By {selectedArticle.authorName}
-                </div>
-              </div>
-              
-              <div className="flex justify-end space-x-2 mt-4">
-                <button
-                  onClick={handleCloseDetails}
-                  className="px-4 py-2 border rounded-md hover:bg-[var(--secondary-background)]"
-                >
-                  Close
-                </button>
-                <button
-                  onClick={() => handleDownload(selectedArticle)}
-                  className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
-                >
-                  Download
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 } 
