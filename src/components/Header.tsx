@@ -20,8 +20,7 @@ export default function Header() {
 
   const submissionItems = [
     { name: "Submit Your Article", href: "/submission" },
-    { name: "Paper Format", href: "/submission/format" },
-    { name: "Undertaking Form", href: "/submission/undertaking" },
+    { name: "Publication Guidelines", href: "/submission/guidelines" },
     { name: "Paper Article Fee", href: "/submission/fee" },
     { name: "Track Article Status", href: "/submission/track" },
     { name: "Article Ethics", href: "/submission/ethics" },

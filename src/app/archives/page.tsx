@@ -5,6 +5,7 @@ import { db } from "../../../lib/firebase";
 import { collection, getDocs } from "firebase/firestore";
 import { toast, Toaster } from "react-hot-toast";
 import Link from "next/link";
+import { getArticleUrl } from "@/lib/utils";
 
 type Article = {
   id: string;
@@ -34,10 +35,48 @@ export default function ArchivesPage() {
   const [loading, setLoading] = useState(true);
   const [selectedArticle, setSelectedArticle] = useState<Article | null>(null);
   const [showDetails, setShowDetails] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [filteredArchives, setFilteredArchives] = useState<Archive[]>([]);
+  const [filteredArticles, setFilteredArticles] = useState<{ [key: string]: Article[] }>({});
 
   useEffect(() => {
     fetchArchives();
   }, []);
+
+  useEffect(() => {
+    // Filter articles based on search query
+    if (searchQuery.trim() === "") {
+      setFilteredArchives(archives);
+      setFilteredArticles(archivedArticles);
+      return;
+    }
+
+    const query = searchQuery.toLowerCase();
+    
+    // Create a copy of the archives to filter
+    const filteredArchivesCopy: Archive[] = [];
+    const filteredArticlesCopy: { [key: string]: Article[] } = {};
+
+    // For each archive, filter its articles
+    archives.forEach(archive => {
+      const articlesInArchive = archivedArticles[archive.name] || [];
+      
+      // Filter articles that match the query in title or author name
+      const matchingArticles = articlesInArchive.filter(article => 
+        (article.title?.toLowerCase().includes(query) || false) || 
+        article.authorName.toLowerCase().includes(query)
+      );
+      
+      // Only include archives that have matching articles
+      if (matchingArticles.length > 0) {
+        filteredArchivesCopy.push(archive);
+        filteredArticlesCopy[archive.name] = matchingArticles;
+      }
+    });
+
+    setFilteredArchives(filteredArchivesCopy);
+    setFilteredArticles(filteredArticlesCopy);
+  }, [searchQuery, archives, archivedArticles]);
 
   const fetchArchives = async () => {
     try {
@@ -56,6 +95,7 @@ export default function ArchivesPage() {
       });
       
       setArchives(archivesList);
+      setFilteredArchives(archivesList);
       
       // Fetch articles for each archive
       const articlesRef = collection(db, "articles");
@@ -89,6 +129,7 @@ export default function ArchivesPage() {
       });
       
       setArchivedArticles(archiveArticles);
+      setFilteredArticles(archiveArticles);
     } catch (error) {
       console.error("Error fetching archives:", error);
       toast.error("Failed to load archives");
@@ -107,31 +148,71 @@ export default function ArchivesPage() {
     toast.success("Download started");
   };
 
-  const handleShowDetails = (article: Article) => {
-    setSelectedArticle(article);
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchQuery(e.target.value);
   };
 
-  const handleCloseDetails = () => {
-    setSelectedArticle(null);
+  const clearSearch = () => {
+    setSearchQuery("");
   };
 
   return (
     <div className="container py-12">
       <Toaster position="top-right" />
       <div className="max-w-6xl mx-auto">
-        <h1 className="text-3xl font-bold mb-8 text-[var(--foreground)]">Archives</h1>
+        <h1 className="text-3xl font-bold mb-6 text-[var(--foreground)]">Archives</h1>
+        
+        {/* Search Bar */}
+        <div className="mb-8">
+          <div className="relative">
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={handleSearchChange}
+              placeholder="Search by title or author name..."
+              className="w-full px-4 py-3 pr-10 border border-[var(--border)] rounded-lg bg-[var(--background)] text-[var(--foreground)] focus:outline-none focus:ring-2 focus:ring-[var(--accent)]"
+            />
+            {searchQuery && (
+              <button
+                onClick={clearSearch}
+                className="absolute right-3 top-1/2 transform -translate-y-1/2 text-[var(--secondary-text)] hover:text-[var(--foreground)]"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+                </svg>
+              </button>
+            )}
+          </div>
+          {searchQuery && (
+            <div className="mt-2 text-sm text-[var(--secondary-text)]">
+              Showing results for: <span className="font-medium text-[var(--foreground)]">"{searchQuery}"</span>
+            </div>
+          )}
+        </div>
         
         {loading ? (
           <div className="flex justify-center py-12">
             <div className="animate-spin h-8 w-8 border-4 border-[var(--accent)] rounded-full border-t-transparent"></div>
           </div>
-        ) : archives.length === 0 ? (
+        ) : filteredArchives.length === 0 ? (
           <div className="text-center py-12 bg-[var(--background)] rounded-lg">
-            <p className="text-[var(--secondary-text)]">No archives available.</p>
+            {searchQuery ? (
+              <div>
+                <p className="text-[var(--secondary-text)] mb-4">No results found for "{searchQuery}".</p>
+                <button 
+                  onClick={clearSearch}
+                  className="px-4 py-2 bg-[var(--accent)] text-white rounded-md hover:bg-opacity-90 transition-colors"
+                >
+                  Clear Search
+                </button>
+              </div>
+            ) : (
+              <p className="text-[var(--secondary-text)]">No archives available.</p>
+            )}
           </div>
         ) : (
           <div className="space-y-8">
-            {archives.map((archive) => (
+            {filteredArchives.map((archive) => (
               <div key={archive.id} className="bg-[var(--background)] shadow-md rounded-lg border border-[var(--border)] overflow-hidden">
                 <div className="p-4 border-b border-[var(--border)]">
                   <h2 className="text-xl font-semibold text-[var(--foreground)]">{archive.name}</h2>
@@ -140,7 +221,7 @@ export default function ArchivesPage() {
                   </p>
                 </div>
                 
-                {archivedArticles[archive.name]?.length > 0 ? (
+                {filteredArticles[archive.name]?.length > 0 ? (
                   <div className="overflow-x-auto">
                     <table className="min-w-full divide-y divide-[var(--border)]">
                       <thead>
@@ -160,7 +241,7 @@ export default function ArchivesPage() {
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-[var(--border)]">
-                        {archivedArticles[archive.name].map((article) => (
+                        {filteredArticles[archive.name].map((article) => (
                           <tr key={article.id}>
                             <td className="px-4 py-4 whitespace-nowrap">
                               <div className="text-sm font-medium text-[var(--foreground)]">{article.title || article.name}</div>
@@ -176,7 +257,7 @@ export default function ArchivesPage() {
                             </td>
                             <td className="px-4 py-4 whitespace-nowrap space-x-2">
                               <Link
-                                href={`/article/${article.id}`}
+                                href={getArticleUrl(article.id, article.title)}
                                 className="inline-flex items-center px-3 py-1 border border-transparent text-sm leading-4 font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none"
                               >
                                 View Details

@@ -1,12 +1,11 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { db } from "../../../../lib/firebase";
+import { db } from "../../../../../lib/firebase";
 import { doc, getDoc } from "firebase/firestore";
-import { useParams, useRouter } from "next/navigation";
+import { useParams } from "next/navigation";
 import { toast, Toaster } from "react-hot-toast";
 import Link from "next/link";
-import { generateSlug } from "@/lib/utils";
 
 type Article = {
   id: string;
@@ -28,7 +27,6 @@ export default function ArticlePage() {
   const [article, setArticle] = useState<Article | null>(null);
   const [loading, setLoading] = useState(true);
   const params = useParams();
-  const router = useRouter();
   const articleId = params.id as string;
 
   useEffect(() => {
@@ -37,7 +35,7 @@ export default function ArticlePage() {
         const articleDoc = await getDoc(doc(db, "articles", articleId));
         if (articleDoc.exists()) {
           const data = articleDoc.data();
-          const articleData = {
+          setArticle({
             id: articleDoc.id,
             name: data.name,
             authorName: data.authorName,
@@ -51,15 +49,7 @@ export default function ArticlePage() {
             abstract: data.abstract,
             keywords: data.keywords,
             archiveName: data.archiveName
-          };
-          
-          setArticle(articleData);
-          
-          // Redirect to slug URL if there's a title
-          if (data.title) {
-            const slug = generateSlug(data.title);
-            router.push(`/article/${articleId}/${slug}`);
-          }
+          });
         } else {
           toast.error("Article not found");
         }
@@ -72,7 +62,7 @@ export default function ArticlePage() {
     };
 
     fetchArticle();
-  }, [articleId, router]);
+  }, [articleId]);
 
   const handleDownload = () => {
     if (!article) return;

@@ -22,7 +22,7 @@ export default function SubmissionPage() {
           <div className="space-y-4 text-[var(--foreground)]">
             <ul className="list-disc pl-5 space-y-4">
               <li>
-                We recommend to read the <Link href="/submission/format" className="text-blue-600 hover:underline">publication guidelines/process</Link>, 
+                We recommend to read the <Link href="/submission/guidelines" className="text-blue-600 hover:underline">publication guidelines</Link>, 
                 <Link href="/submission/fee" className="text-blue-600 hover:underline ml-1">Fees & Payment</Link> and 
                 <Link href="/faq" className="text-blue-600 hover:underline ml-1">FAQs</Link> before submitting your research paper / article / manuscript for publication.
               </li>

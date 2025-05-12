@@ -5,6 +5,7 @@ import { db } from "../../../lib/firebase";
 import { collection, getDocs, query, orderBy } from "firebase/firestore";
 import { toast, Toaster } from "react-hot-toast";
 import Link from "next/link";
+import { getArticleUrl } from "@/lib/utils";
 
 type Article = {
   id: string;
@@ -28,11 +29,31 @@ export default function CurrentIssue() {
   const [selectedArticle, setSelectedArticle] = useState<Article | null>(null);
   const [showDetails, setShowDetails] = useState(false);
   const [currentIssueTitle, setCurrentIssueTitle] = useState("");
+  const [searchQuery, setSearchQuery] = useState("");
+  const [filteredArticles, setFilteredArticles] = useState<Article[]>([]);
 
   useEffect(() => {
     fetchArticles();
     fetchCurrentIssueTitle();
   }, []);
+
+  useEffect(() => {
+    // Filter articles based on search query
+    if (searchQuery.trim() === "") {
+      setFilteredArticles(articles);
+      return;
+    }
+
+    const query = searchQuery.toLowerCase();
+    
+    // Filter articles that match the query in title or author name
+    const matchingArticles = articles.filter(article => 
+      (article.title?.toLowerCase().includes(query) || false) || 
+      article.authorName.toLowerCase().includes(query)
+    );
+    
+    setFilteredArticles(matchingArticles);
+  }, [searchQuery, articles]);
 
   const fetchCurrentIssueTitle = async () => {
     try {
@@ -82,6 +103,7 @@ export default function CurrentIssue() {
       });
       
       setArticles(currentIssueArticles);
+      setFilteredArticles(currentIssueArticles);
       
     } catch (error) {
       console.error("Error fetching articles:", error);
@@ -99,6 +121,14 @@ export default function CurrentIssue() {
     downloadLink.click();
     document.body.removeChild(downloadLink);
     toast.success("Download started");
+  };
+
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchQuery(e.target.value);
+  };
+
+  const clearSearch = () => {
+    setSearchQuery("");
   };
 
   const handleShowDetails = (article: Article) => {
@@ -122,15 +152,55 @@ export default function CurrentIssue() {
           </p>
         </div>
         
+        {/* Search Bar */}
+        <div className="mb-8">
+          <div className="relative">
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={handleSearchChange}
+              placeholder="Search by title or author name..."
+              className="w-full px-4 py-3 pr-10 border border-[var(--border)] rounded-lg bg-[var(--background)] text-[var(--foreground)] focus:outline-none focus:ring-2 focus:ring-[var(--accent)]"
+            />
+            {searchQuery && (
+              <button
+                onClick={clearSearch}
+                className="absolute right-3 top-1/2 transform -translate-y-1/2 text-[var(--secondary-text)] hover:text-[var(--foreground)]"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+                </svg>
+              </button>
+            )}
+          </div>
+          {searchQuery && (
+            <div className="mt-2 text-sm text-[var(--secondary-text)]">
+              Showing results for: <span className="font-medium text-[var(--foreground)]">"{searchQuery}"</span>
+            </div>
+          )}
+        </div>
+        
         {loading ? (
           <div className="flex justify-center py-12">
             <div className="animate-spin h-8 w-8 border-4 border-[var(--accent)] rounded-full border-t-transparent"></div>
           </div>
-        ) : articles.length === 0 ? (
+        ) : filteredArticles.length === 0 ? (
           <div className="text-center py-12 bg-[var(--background)] rounded-lg">
-            <p className="text-[var(--secondary-text)]">
-              No articles in the current issue yet.
-            </p>
+            {searchQuery ? (
+              <div>
+                <p className="text-[var(--secondary-text)] mb-4">No results found for "{searchQuery}".</p>
+                <button 
+                  onClick={clearSearch}
+                  className="px-4 py-2 bg-[var(--accent)] text-white rounded-md hover:bg-opacity-90 transition-colors"
+                >
+                  Clear Search
+                </button>
+              </div>
+            ) : (
+              <p className="text-[var(--secondary-text)]">
+                No articles in the current issue yet.
+              </p>
+            )}
           </div>
         ) : (
           <div className="bg-[var(--background)] shadow-md rounded-lg border border-[var(--border)] overflow-hidden">
@@ -153,7 +223,7 @@ export default function CurrentIssue() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-[var(--border)] bg-[var(--background)]">
-                  {articles.map((article) => (
+                  {filteredArticles.map((article) => (
                     <tr key={article.id}>
                       <td className="px-4 py-4 whitespace-nowrap">
                         <div className="text-sm font-medium text-[var(--foreground)]">{article.title || article.name}</div>
@@ -169,7 +239,7 @@ export default function CurrentIssue() {
                       </td>
                       <td className="px-4 py-4 whitespace-nowrap space-x-2">
                         <Link
-                          href={`/article/${article.id}`}
+                          href={getArticleUrl(article.id, article.title)}
                           className="inline-flex items-center px-3 py-1 border border-transparent text-sm leading-4 font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none"
                         >
                           View Details
