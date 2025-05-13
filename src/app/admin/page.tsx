@@ -301,13 +301,11 @@ export default function AdminDashboard() {
       const articleRef = doc(db, "articles", article.id);
       
       // Update article status back to 'pending' and remove from current issue
+      // While preserving the title, abstract, and keywords
       await updateDoc(articleRef, {
         status: "pending",
         issue: null,
-        approvedDate: null,
-        title: null,
-        abstract: null,
-        keywords: null
+        approvedDate: null
       });
       
       toast.success(`"${article.title || article.name}" has been moved back to pending submissions`);
@@ -370,9 +368,9 @@ export default function AdminDashboard() {
             {articles.map((article) => (
               <tr key={article.id}>
                 <td className="px-4 py-4 whitespace-nowrap">
-                  <div className="text-sm font-medium text-[var(--foreground)]">{article.name}</div>
+                  <div className="text-sm font-medium text-[var(--foreground)]">{article.title || article.name}</div>
                   <div className="text-xs text-[var(--secondary-text)]">{article.fileType}</div>
-                  {activeTab === "current" && article.title && (
+                  {article.title && (
                     <button
                       onClick={() => toggleArticleDetails(article.id)}
                       className="mt-2 text-xs text-[var(--accent)] hover:underline"
@@ -380,7 +378,7 @@ export default function AdminDashboard() {
                       {expandedArticle === article.id ? 'Hide Details' : 'Show Details'}
                     </button>
                   )}
-                  {activeTab === "current" && expandedArticle === article.id && article.title && (
+                  {expandedArticle === article.id && article.title && (
                     <div className="mt-2 p-3 bg-[var(--secondary-background)] rounded-md">
                       <div className="mb-2">
                         <span className="font-medium">Title:</span>
@@ -837,6 +835,30 @@ export default function AdminDashboard() {
                           <td className="px-4 py-4 whitespace-nowrap">
                             <div className="text-sm font-medium text-[var(--foreground)]">{article.title || article.name}</div>
                             <div className="text-xs text-[var(--secondary-text)]">{article.fileType}</div>
+                            {article.title && (
+                              <button
+                                onClick={() => toggleArticleDetails(article.id)}
+                                className="mt-2 text-xs text-[var(--accent)] hover:underline"
+                              >
+                                {expandedArticle === article.id ? 'Hide Details' : 'Show Details'}
+                              </button>
+                            )}
+                            {expandedArticle === article.id && article.title && (
+                              <div className="mt-2 p-3 bg-[var(--secondary-background)] rounded-md">
+                                <div className="mb-2">
+                                  <span className="font-medium">Title:</span>
+                                  <p className="text-sm">{article.title}</p>
+                                </div>
+                                <div className="mb-2">
+                                  <span className="font-medium">Abstract:</span>
+                                  <p className="text-sm">{article.abstract}</p>
+                                </div>
+                                <div>
+                                  <span className="font-medium">Keywords:</span>
+                                  <p className="text-sm">{article.keywords}</p>
+                                </div>
+                              </div>
+                            )}
                           </td>
                           <td className="px-4 py-4 whitespace-nowrap">
                             <div className="text-sm text-[var(--foreground)]">{article.authorName}</div>
@@ -892,7 +914,7 @@ export default function AdminDashboard() {
             <div className="bg-[var(--background)] rounded-lg p-6 max-w-2xl w-full mx-4">
               <h3 className="text-xl font-bold mb-4">Approve Submission</h3>
               <p className="mb-4 text-[var(--secondary-text)]">
-                Are you sure you want to approve this submission? The article will be added to the current issue.
+                Are you sure you want to approve this submission? The article will be added to the current issue with its existing title, abstract, and keywords.
               </p>
               <div className="flex justify-end space-x-2">
                 <button
