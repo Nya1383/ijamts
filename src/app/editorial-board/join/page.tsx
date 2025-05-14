@@ -97,13 +97,25 @@ export default function JoinAsReviewerPage() {
     setIsSubmitting(true);
 
     try {
-      // In a real implementation, you would upload the file to storage
-      // and save the form data to your database
+      // In a real implementation, you would first upload the files to storage
+      // and then include the download URLs in the email
       
-      // Simulating API call with timeout
-      await new Promise(resolve => setTimeout(resolve, 1500));
+      // Send the form data to the email API endpoint
+      const response = await fetch('/api/send-email', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formData),
+      });
       
-      toast.success("Application submitted successfully!");
+      const data = await response.json();
+      
+      if (!response.ok || !data.success) {
+        throw new Error(data.message || 'Failed to submit application');
+      }
+      
+      toast.success("Application submitted successfully! We'll contact you soon.");
       
       // Reset form after successful submission
       setFormData({
@@ -133,7 +145,7 @@ export default function JoinAsReviewerPage() {
       
     } catch (error) {
       console.error("Error submitting reviewer application:", error);
-      toast.error("Failed to submit application. Please try again later.");
+      toast.error(error instanceof Error ? error.message : "Failed to submit application. Please try again later.");
     } finally {
       setIsSubmitting(false);
     }
@@ -195,10 +207,10 @@ export default function JoinAsReviewerPage() {
                     value={formData.salutation}
                     onChange={handleChange}
                     required
-                    className="w-full px-4 py-2 border border-[var(--border)] rounded-md bg-[var(--input-background)] text-gray-800 dark:text-gray-100"
+                    className="w-full px-4 py-2 border border-[var(--border)] rounded-md bg-[var(--input-background)] text-gray-800"
                   >
                     {salutations.map((item, index) => (
-                      <option key={index} value={index === 0 ? "" : item} disabled={index === 0} className={index === 0 ? "text-gray-500" : ""}>
+                      <option key={index} value={index === 0 ? "" : item} disabled={index === 0} className={index === 0 ? "text-gray-500" : "text-gray-800"}>
                         {item}
                       </option>
                     ))}
@@ -356,10 +368,10 @@ export default function JoinAsReviewerPage() {
                       value={formData.country}
                       onChange={handleChange}
                       required
-                      className="w-full px-4 py-2 border border-[var(--border)] rounded-md bg-[var(--input-background)] text-gray-800 dark:text-gray-100"
+                      className="w-full px-4 py-2 border border-[var(--border)] rounded-md bg-[var(--input-background)] text-gray-800"
                     >
                       {countries.map((country, index) => (
-                        <option key={index} value={index === 0 ? "" : country} disabled={index === 0} className={index === 0 ? "text-gray-500" : ""}>
+                        <option key={index} value={index === 0 ? "" : country} disabled={index === 0} className={index === 0 ? "text-gray-500" : "text-gray-800"}>
                           {country}
                         </option>
                       ))}
@@ -449,10 +461,10 @@ export default function JoinAsReviewerPage() {
                     value={formData.disciplineField}
                     onChange={handleChange}
                     required
-                    className="w-full px-4 py-2 border border-[var(--border)] rounded-md bg-[var(--input-background)] text-gray-800 dark:text-gray-100"
+                    className="w-full px-4 py-2 border border-[var(--border)] rounded-md bg-[var(--input-background)] text-gray-800"
                   >
                     {disciplineFields.map((field, index) => (
-                      <option key={index} value={index === 0 ? "" : field} disabled={index === 0} className={index === 0 ? "text-gray-500" : ""}>
+                      <option key={index} value={index === 0 ? "" : field} disabled={index === 0} className={index === 0 ? "text-gray-500" : "text-gray-800"}>
                         {field}
                       </option>
                     ))}
@@ -539,13 +551,13 @@ export default function JoinAsReviewerPage() {
               <button
                 type="submit"
                 disabled={isSubmitting}
-                className={`w-full px-6 py-3 bg-[var(--accent)] text-white text-lg font-medium rounded-md transition-colors ${
+                className={`w-full px-6 py-3 bg-[var(--accent)] text-gray-800 text-lg font-medium rounded-md transition-colors ${
                   isSubmitting ? "opacity-70 cursor-not-allowed" : "hover:bg-opacity-90"
                 }`}
               >
                 {isSubmitting ? (
                   <span className="flex items-center justify-center">
-                    <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-gray-800" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                       <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                       <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                     </svg>
