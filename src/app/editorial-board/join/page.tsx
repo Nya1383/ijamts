@@ -20,8 +20,13 @@ export default function JoinAsReviewerPage() {
     email: "",
     mobileNumber: "",
     country: "",
+    stateProvince: "",
+    cityDistrict: "",
+    postalCode: "",
+    address: ""
   });
   const [file, setFile] = useState<File | null>(null);
+  const [photo, setPhoto] = useState<File | null>(null);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
@@ -34,15 +39,21 @@ export default function JoinAsReviewerPage() {
     }
   };
 
+  const handlePhotoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files.length > 0) {
+      setPhoto(e.target.files[0]);
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     // Form validation for required fields
-    const requiredFields = ['salutation', 'name', 'qualification', 'designation', 'organization', 'disciplineField', 'email', 'mobileNumber', 'country'];
+    const requiredFields = ['salutation', 'name', 'qualification', 'designation', 'organization', 'disciplineField', 'email', 'mobileNumber', 'country', 'cityDistrict', 'postalCode', 'address'];
     const missingFields = requiredFields.filter(field => !formData[field as keyof typeof formData]);
     
-    if (missingFields.length > 0 || !file) {
-      toast.error("Please fill all required fields");
+    if (missingFields.length > 0 || !file || !photo) {
+      toast.error("Please fill all required fields and upload all required files");
       return;
     }
 
@@ -62,7 +73,13 @@ export default function JoinAsReviewerPage() {
 
     // File size validation (max 5MB)
     if (file && file.size > 5 * 1024 * 1024) {
-      toast.error("File size should be less than 5MB");
+      toast.error("CV file size should be less than 5MB");
+      return;
+    }
+
+    // Photo size validation (max 2MB)
+    if (photo && photo.size > 2 * 1024 * 1024) {
+      toast.error("Photo file size should be less than 2MB");
       return;
     }
 
@@ -91,8 +108,13 @@ export default function JoinAsReviewerPage() {
         email: "",
         mobileNumber: "",
         country: "",
+        stateProvince: "",
+        cityDistrict: "",
+        postalCode: "",
+        address: ""
       });
       setFile(null);
+      setPhoto(null);
       
       // Redirect to thank you page or home page
       // router.push("/editorial-board/join/thank-you");
@@ -144,226 +166,338 @@ export default function JoinAsReviewerPage() {
 
         <div className="bg-[var(--background)] rounded-xl shadow-lg p-8 border border-[var(--border)]">
           <form onSubmit={handleSubmit} className="space-y-6">
-            <div>
-              <label htmlFor="salutation" className="block text-sm font-medium text-[var(--foreground)] mb-1">
-                Salutation <span className="text-red-500">*</span>
-              </label>
-              <select
-                id="salutation"
-                name="salutation"
-                value={formData.salutation}
-                onChange={handleChange}
-                required
-                className="w-full px-4 py-2 border border-[var(--border)] rounded-md bg-[var(--input-background)] text-[var(--foreground)]"
-              >
-                {salutations.map((item, index) => (
-                  <option key={index} value={index === 0 ? "" : item} disabled={index === 0}>
-                    {item}
-                  </option>
-                ))}
-              </select>
+            {/* Personal Information Section */}
+            <div className="mb-6">
+              <h2 className="text-xl font-semibold text-[var(--foreground)] mb-4 pb-2 border-b border-[var(--border)]">
+                Personal Information
+              </h2>
+              
+              <div className="space-y-6">
+                <div>
+                  <label htmlFor="salutation" className="block text-sm font-medium text-[var(--foreground)] mb-1">
+                    Salutation <span className="text-red-500">*</span>
+                  </label>
+                  <select
+                    id="salutation"
+                    name="salutation"
+                    value={formData.salutation}
+                    onChange={handleChange}
+                    required
+                    className="w-full px-4 py-2 border border-[var(--border)] rounded-md bg-[var(--input-background)] text-[var(--foreground)]"
+                  >
+                    {salutations.map((item, index) => (
+                      <option key={index} value={index === 0 ? "" : item} disabled={index === 0}>
+                        {item}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div>
+                  <label htmlFor="name" className="block text-sm font-medium text-[var(--foreground)] mb-1">
+                    Full Name <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    id="name"
+                    name="name"
+                    value={formData.name}
+                    onChange={handleChange}
+                    required
+                    className="w-full px-4 py-2 border border-[var(--border)] rounded-md bg-[var(--input-background)] text-[var(--foreground)]"
+                    placeholder="Enter your full name"
+                  />
+                </div>
+
+                <div>
+                  <label htmlFor="email" className="block text-sm font-medium text-[var(--foreground)] mb-1">
+                    Email Address <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    type="email"
+                    id="email"
+                    name="email"
+                    value={formData.email}
+                    onChange={handleChange}
+                    required
+                    className="w-full px-4 py-2 border border-[var(--border)] rounded-md bg-[var(--input-background)] text-[var(--foreground)]"
+                    placeholder="Enter your email address"
+                  />
+                </div>
+
+                <div>
+                  <label htmlFor="mobileNumber" className="block text-sm font-medium text-[var(--foreground)] mb-1">
+                    Mobile Number <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    type="tel"
+                    id="mobileNumber"
+                    name="mobileNumber"
+                    value={formData.mobileNumber}
+                    onChange={handleChange}
+                    required
+                    className="w-full px-4 py-2 border border-[var(--border)] rounded-md bg-[var(--input-background)] text-[var(--foreground)]"
+                    placeholder="Include country code (e.g., +1 555 123 4567)"
+                  />
+                </div>
+
+                <div>
+                  <label htmlFor="photo" className="block text-sm font-medium text-[var(--foreground)] mb-1">
+                    Upload Photo <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    type="file"
+                    id="photo"
+                    name="photo"
+                    accept=".jpg,.jpeg,.png"
+                    onChange={handlePhotoChange}
+                    required
+                    className="w-full px-4 py-2 border border-[var(--border)] rounded-md bg-[var(--input-background)] text-[var(--foreground)]"
+                  />
+                  <p className="mt-1 text-xs text-[var(--secondary-text)]">
+                    Accepted file formats: JPG, JPEG, PNG (max 2MB). Please upload a professional headshot.
+                  </p>
+                </div>
+              </div>
             </div>
 
-            <div>
-              <label htmlFor="name" className="block text-sm font-medium text-[var(--foreground)] mb-1">
-                Full Name <span className="text-red-500">*</span>
-              </label>
-              <input
-                type="text"
-                id="name"
-                name="name"
-                value={formData.name}
-                onChange={handleChange}
-                required
-                className="w-full px-4 py-2 border border-[var(--border)] rounded-md bg-[var(--input-background)] text-[var(--foreground)]"
-                placeholder="Enter your full name"
-              />
+            {/* Address Section */}
+            <div className="mb-6">
+              <h2 className="text-xl font-semibold text-[var(--foreground)] mb-4 pb-2 border-b border-[var(--border)]">
+                Address Information
+              </h2>
+              
+              <div className="space-y-6">
+                <div>
+                  <label htmlFor="address" className="block text-sm font-medium text-[var(--foreground)] mb-1">
+                    Address <span className="text-red-500">*</span>
+                  </label>
+                  <textarea
+                    id="address"
+                    name="address"
+                    value={formData.address}
+                    onChange={handleChange}
+                    required
+                    rows={2}
+                    className="w-full px-4 py-2 border border-[var(--border)] rounded-md bg-[var(--input-background)] text-[var(--foreground)]"
+                    placeholder="Enter your street address"
+                  />
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div>
+                    <label htmlFor="cityDistrict" className="block text-sm font-medium text-[var(--foreground)] mb-1">
+                      City / District <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                      type="text"
+                      id="cityDistrict"
+                      name="cityDistrict"
+                      value={formData.cityDistrict}
+                      onChange={handleChange}
+                      required
+                      className="w-full px-4 py-2 border border-[var(--border)] rounded-md bg-[var(--input-background)] text-[var(--foreground)]"
+                      placeholder="Enter your city or district"
+                    />
+                  </div>
+
+                  <div>
+                    <label htmlFor="stateProvince" className="block text-sm font-medium text-[var(--foreground)] mb-1">
+                      State / Province
+                    </label>
+                    <input
+                      type="text"
+                      id="stateProvince"
+                      name="stateProvince"
+                      value={formData.stateProvince}
+                      onChange={handleChange}
+                      className="w-full px-4 py-2 border border-[var(--border)] rounded-md bg-[var(--input-background)] text-[var(--foreground)]"
+                      placeholder="Enter your state or province"
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div>
+                    <label htmlFor="postalCode" className="block text-sm font-medium text-[var(--foreground)] mb-1">
+                      Postal Code <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                      type="text"
+                      id="postalCode"
+                      name="postalCode"
+                      value={formData.postalCode}
+                      onChange={handleChange}
+                      required
+                      className="w-full px-4 py-2 border border-[var(--border)] rounded-md bg-[var(--input-background)] text-[var(--foreground)]"
+                      placeholder="Enter your postal code"
+                    />
+                  </div>
+
+                  <div>
+                    <label htmlFor="country" className="block text-sm font-medium text-[var(--foreground)] mb-1">
+                      Country <span className="text-red-500">*</span>
+                    </label>
+                    <select
+                      id="country"
+                      name="country"
+                      value={formData.country}
+                      onChange={handleChange}
+                      required
+                      className="w-full px-4 py-2 border border-[var(--border)] rounded-md bg-[var(--input-background)] text-[var(--foreground)]"
+                    >
+                      {countries.map((country, index) => (
+                        <option key={index} value={index === 0 ? "" : country} disabled={index === 0}>
+                          {country}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+              </div>
             </div>
 
-            <div>
-              <label htmlFor="qualification" className="block text-sm font-medium text-[var(--foreground)] mb-1">
-                Qualification <span className="text-red-500">*</span>
-              </label>
-              <input
-                type="text"
-                id="qualification"
-                name="qualification"
-                value={formData.qualification}
-                onChange={handleChange}
-                required
-                className="w-full px-4 py-2 border border-[var(--border)] rounded-md bg-[var(--input-background)] text-[var(--foreground)]"
-                placeholder="E.g., Ph.D. in Computer Science, MBA, etc."
-              />
-            </div>
+            {/* Professional Information Section */}
+            <div className="mb-6">
+              <h2 className="text-xl font-semibold text-[var(--foreground)] mb-4 pb-2 border-b border-[var(--border)]">
+                Professional Information
+              </h2>
+              
+              <div className="space-y-6">
+                <div>
+                  <label htmlFor="qualification" className="block text-sm font-medium text-[var(--foreground)] mb-1">
+                    Qualification <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    id="qualification"
+                    name="qualification"
+                    value={formData.qualification}
+                    onChange={handleChange}
+                    required
+                    className="w-full px-4 py-2 border border-[var(--border)] rounded-md bg-[var(--input-background)] text-[var(--foreground)]"
+                    placeholder="E.g., Ph.D. in Computer Science, MBA, etc."
+                  />
+                </div>
 
-            <div>
-              <label htmlFor="designation" className="block text-sm font-medium text-[var(--foreground)] mb-1">
-                Designation <span className="text-red-500">*</span>
-              </label>
-              <input
-                type="text"
-                id="designation"
-                name="designation"
-                value={formData.designation}
-                onChange={handleChange}
-                required
-                className="w-full px-4 py-2 border border-[var(--border)] rounded-md bg-[var(--input-background)] text-[var(--foreground)]"
-                placeholder="E.g., Professor, Associate Professor, Senior Researcher, etc."
-              />
-            </div>
+                <div>
+                  <label htmlFor="designation" className="block text-sm font-medium text-[var(--foreground)] mb-1">
+                    Designation <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    id="designation"
+                    name="designation"
+                    value={formData.designation}
+                    onChange={handleChange}
+                    required
+                    className="w-full px-4 py-2 border border-[var(--border)] rounded-md bg-[var(--input-background)] text-[var(--foreground)]"
+                    placeholder="E.g., Professor, Associate Professor, Senior Researcher, etc."
+                  />
+                </div>
 
-            <div>
-              <label htmlFor="department" className="block text-sm font-medium text-[var(--foreground)] mb-1">
-                Department
-              </label>
-              <input
-                type="text"
-                id="department"
-                name="department"
-                value={formData.department}
-                onChange={handleChange}
-                className="w-full px-4 py-2 border border-[var(--border)] rounded-md bg-[var(--input-background)] text-[var(--foreground)]"
-                placeholder="Enter your department"
-              />
-            </div>
+                <div>
+                  <label htmlFor="department" className="block text-sm font-medium text-[var(--foreground)] mb-1">
+                    Department
+                  </label>
+                  <input
+                    type="text"
+                    id="department"
+                    name="department"
+                    value={formData.department}
+                    onChange={handleChange}
+                    className="w-full px-4 py-2 border border-[var(--border)] rounded-md bg-[var(--input-background)] text-[var(--foreground)]"
+                    placeholder="Enter your department"
+                  />
+                </div>
 
-            <div>
-              <label htmlFor="organization" className="block text-sm font-medium text-[var(--foreground)] mb-1">
-                Organization <span className="text-red-500">*</span>
-              </label>
-              <input
-                type="text"
-                id="organization"
-                name="organization"
-                value={formData.organization}
-                onChange={handleChange}
-                required
-                className="w-full px-4 py-2 border border-[var(--border)] rounded-md bg-[var(--input-background)] text-[var(--foreground)]"
-                placeholder="Enter your university, research institute, or organization"
-              />
-            </div>
+                <div>
+                  <label htmlFor="organization" className="block text-sm font-medium text-[var(--foreground)] mb-1">
+                    Organization <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    id="organization"
+                    name="organization"
+                    value={formData.organization}
+                    onChange={handleChange}
+                    required
+                    className="w-full px-4 py-2 border border-[var(--border)] rounded-md bg-[var(--input-background)] text-[var(--foreground)]"
+                    placeholder="Enter your university, research institute, or organization"
+                  />
+                </div>
 
-            <div>
-              <label htmlFor="disciplineField" className="block text-sm font-medium text-[var(--foreground)] mb-1">
-                Discipline Field <span className="text-red-500">*</span>
-              </label>
-              <select
-                id="disciplineField"
-                name="disciplineField"
-                value={formData.disciplineField}
-                onChange={handleChange}
-                required
-                className="w-full px-4 py-2 border border-[var(--border)] rounded-md bg-[var(--input-background)] text-[var(--foreground)]"
-              >
-                {disciplineFields.map((field, index) => (
-                  <option key={index} value={index === 0 ? "" : field} disabled={index === 0}>
-                    {field}
-                  </option>
-                ))}
-              </select>
-            </div>
+                <div>
+                  <label htmlFor="disciplineField" className="block text-sm font-medium text-[var(--foreground)] mb-1">
+                    Discipline Field <span className="text-red-500">*</span>
+                  </label>
+                  <select
+                    id="disciplineField"
+                    name="disciplineField"
+                    value={formData.disciplineField}
+                    onChange={handleChange}
+                    required
+                    className="w-full px-4 py-2 border border-[var(--border)] rounded-md bg-[var(--input-background)] text-[var(--foreground)]"
+                  >
+                    {disciplineFields.map((field, index) => (
+                      <option key={index} value={index === 0 ? "" : field} disabled={index === 0}>
+                        {field}
+                      </option>
+                    ))}
+                  </select>
+                </div>
 
-            <div>
-              <label htmlFor="researchAreas" className="block text-sm font-medium text-[var(--foreground)] mb-1">
-                Research Area(s)
-              </label>
-              <textarea
-                id="researchAreas"
-                name="researchAreas"
-                value={formData.researchAreas}
-                onChange={handleChange}
-                rows={2}
-                className="w-full px-4 py-2 border border-[var(--border)] rounded-md bg-[var(--input-background)] text-[var(--foreground)]"
-                placeholder="List your main research areas (comma separated)"
-              />
-            </div>
+                <div>
+                  <label htmlFor="researchAreas" className="block text-sm font-medium text-[var(--foreground)] mb-1">
+                    Research Area(s)
+                  </label>
+                  <textarea
+                    id="researchAreas"
+                    name="researchAreas"
+                    value={formData.researchAreas}
+                    onChange={handleChange}
+                    rows={2}
+                    className="w-full px-4 py-2 border border-[var(--border)] rounded-md bg-[var(--input-background)] text-[var(--foreground)]"
+                    placeholder="List your main research areas (comma separated)"
+                  />
+                </div>
 
-            <div>
-              <label htmlFor="orcid" className="block text-sm font-medium text-[var(--foreground)] mb-1">
-                ORCID
-              </label>
-              <input
-                type="text"
-                id="orcid"
-                name="orcid"
-                value={formData.orcid}
-                onChange={handleChange}
-                className="w-full px-4 py-2 border border-[var(--border)] rounded-md bg-[var(--input-background)] text-[var(--foreground)]"
-                placeholder="E.g., 0000-0002-1825-0097"
-              />
-              <p className="mt-1 text-xs text-[var(--secondary-text)]">
-                Format: 0000-0000-0000-0000
-              </p>
-            </div>
+                <div>
+                  <label htmlFor="orcid" className="block text-sm font-medium text-[var(--foreground)] mb-1">
+                    ORCID
+                  </label>
+                  <input
+                    type="text"
+                    id="orcid"
+                    name="orcid"
+                    value={formData.orcid}
+                    onChange={handleChange}
+                    className="w-full px-4 py-2 border border-[var(--border)] rounded-md bg-[var(--input-background)] text-[var(--foreground)]"
+                    placeholder="E.g., 0000-0002-1825-0097"
+                  />
+                  <p className="mt-1 text-xs text-[var(--secondary-text)]">
+                    Format: 0000-0000-0000-0000
+                  </p>
+                </div>
 
-            <div>
-              <label htmlFor="email" className="block text-sm font-medium text-[var(--foreground)] mb-1">
-                Email Address <span className="text-red-500">*</span>
-              </label>
-              <input
-                type="email"
-                id="email"
-                name="email"
-                value={formData.email}
-                onChange={handleChange}
-                required
-                className="w-full px-4 py-2 border border-[var(--border)] rounded-md bg-[var(--input-background)] text-[var(--foreground)]"
-                placeholder="Enter your email address"
-              />
-            </div>
-
-            <div>
-              <label htmlFor="mobileNumber" className="block text-sm font-medium text-[var(--foreground)] mb-1">
-                Mobile Number <span className="text-red-500">*</span>
-              </label>
-              <input
-                type="tel"
-                id="mobileNumber"
-                name="mobileNumber"
-                value={formData.mobileNumber}
-                onChange={handleChange}
-                required
-                className="w-full px-4 py-2 border border-[var(--border)] rounded-md bg-[var(--input-background)] text-[var(--foreground)]"
-                placeholder="Include country code (e.g., +1 555 123 4567)"
-              />
-            </div>
-
-            <div>
-              <label htmlFor="country" className="block text-sm font-medium text-[var(--foreground)] mb-1">
-                Country <span className="text-red-500">*</span>
-              </label>
-              <select
-                id="country"
-                name="country"
-                value={formData.country}
-                onChange={handleChange}
-                required
-                className="w-full px-4 py-2 border border-[var(--border)] rounded-md bg-[var(--input-background)] text-[var(--foreground)]"
-              >
-                {countries.map((country, index) => (
-                  <option key={index} value={index === 0 ? "" : country} disabled={index === 0}>
-                    {country}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            <div>
-              <label htmlFor="cv" className="block text-sm font-medium text-[var(--foreground)] mb-1">
-                Upload CV/Resume <span className="text-red-500">*</span>
-              </label>
-              <input
-                type="file"
-                id="cv"
-                name="cv"
-                accept=".pdf,.doc,.docx"
-                onChange={handleFileChange}
-                required
-                className="w-full px-4 py-2 border border-[var(--border)] rounded-md bg-[var(--input-background)] text-[var(--foreground)]"
-              />
-              <p className="mt-1 text-xs text-[var(--secondary-text)]">
-                Accepted file formats: PDF, DOC, DOCX (max 5MB)
-              </p>
+                <div>
+                  <label htmlFor="cv" className="block text-sm font-medium text-[var(--foreground)] mb-1">
+                    Upload CV/Resume <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    type="file"
+                    id="cv"
+                    name="cv"
+                    accept=".pdf,.doc,.docx"
+                    onChange={handleFileChange}
+                    required
+                    className="w-full px-4 py-2 border border-[var(--border)] rounded-md bg-[var(--input-background)] text-[var(--foreground)]"
+                  />
+                  <p className="mt-1 text-xs text-[var(--secondary-text)]">
+                    Accepted file formats: PDF, DOC, DOCX (max 5MB)
+                  </p>
+                </div>
+              </div>
             </div>
 
             <div className="pt-4">
