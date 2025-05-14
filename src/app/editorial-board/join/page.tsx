@@ -27,10 +27,15 @@ export default function JoinAsReviewerPage() {
   });
   const [file, setFile] = useState<File | null>(null);
   const [photo, setPhoto] = useState<File | null>(null);
+  const [agreeToPolicy, setAgreeToPolicy] = useState(false);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
+  };
+
+  const handleCheckboxChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setAgreeToPolicy(e.target.checked);
   };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -54,6 +59,12 @@ export default function JoinAsReviewerPage() {
     
     if (missingFields.length > 0 || !file || !photo) {
       toast.error("Please fill all required fields and upload all required files");
+      return;
+    }
+
+    // Check policy agreement
+    if (!agreeToPolicy) {
+      toast.error("You must agree to the journal's policies to proceed");
       return;
     }
 
@@ -115,6 +126,7 @@ export default function JoinAsReviewerPage() {
       });
       setFile(null);
       setPhoto(null);
+      setAgreeToPolicy(false);
       
       // Redirect to thank you page or home page
       // router.push("/editorial-board/join/thank-you");
@@ -183,10 +195,10 @@ export default function JoinAsReviewerPage() {
                     value={formData.salutation}
                     onChange={handleChange}
                     required
-                    className="w-full px-4 py-2 border border-[var(--border)] rounded-md bg-[var(--input-background)] text-[var(--foreground)]"
+                    className="w-full px-4 py-2 border border-[var(--border)] rounded-md bg-[var(--input-background)] text-gray-800 dark:text-gray-100"
                   >
                     {salutations.map((item, index) => (
-                      <option key={index} value={index === 0 ? "" : item} disabled={index === 0}>
+                      <option key={index} value={index === 0 ? "" : item} disabled={index === 0} className={index === 0 ? "text-gray-500" : ""}>
                         {item}
                       </option>
                     ))}
@@ -344,10 +356,10 @@ export default function JoinAsReviewerPage() {
                       value={formData.country}
                       onChange={handleChange}
                       required
-                      className="w-full px-4 py-2 border border-[var(--border)] rounded-md bg-[var(--input-background)] text-[var(--foreground)]"
+                      className="w-full px-4 py-2 border border-[var(--border)] rounded-md bg-[var(--input-background)] text-gray-800 dark:text-gray-100"
                     >
                       {countries.map((country, index) => (
-                        <option key={index} value={index === 0 ? "" : country} disabled={index === 0}>
+                        <option key={index} value={index === 0 ? "" : country} disabled={index === 0} className={index === 0 ? "text-gray-500" : ""}>
                           {country}
                         </option>
                       ))}
@@ -437,10 +449,10 @@ export default function JoinAsReviewerPage() {
                     value={formData.disciplineField}
                     onChange={handleChange}
                     required
-                    className="w-full px-4 py-2 border border-[var(--border)] rounded-md bg-[var(--input-background)] text-[var(--foreground)]"
+                    className="w-full px-4 py-2 border border-[var(--border)] rounded-md bg-[var(--input-background)] text-gray-800 dark:text-gray-100"
                   >
                     {disciplineFields.map((field, index) => (
-                      <option key={index} value={index === 0 ? "" : field} disabled={index === 0}>
+                      <option key={index} value={index === 0 ? "" : field} disabled={index === 0} className={index === 0 ? "text-gray-500" : ""}>
                         {field}
                       </option>
                     ))}
@@ -498,6 +510,29 @@ export default function JoinAsReviewerPage() {
                   </p>
                 </div>
               </div>
+            </div>
+
+            {/* Agreement Section */}
+            <div className="pt-4 border-t border-[var(--border)]">
+              <div className="flex items-start mt-4">
+                <div className="flex items-center h-5">
+                  <input
+                    id="agreeToPolicy"
+                    name="agreeToPolicy"
+                    type="checkbox"
+                    checked={agreeToPolicy}
+                    onChange={handleCheckboxChange}
+                    required
+                    className="w-4 h-4 border border-[var(--border)] rounded accent-[var(--accent)] bg-[var(--input-background)]"
+                  />
+                </div>
+                <label htmlFor="agreeToPolicy" className="ml-3 text-sm text-[var(--foreground)]">
+                  I agree with the journal/website's policies <span className="text-red-500">*</span>
+                </label>
+              </div>
+              <p className="mt-1 text-xs text-[var(--secondary-text)] ml-7">
+                By checking this box, you confirm that you have read and agreed to our <a href="/policies" className="text-[var(--accent)] hover:underline">terms and policies</a>.
+              </p>
             </div>
 
             <div className="pt-4">
