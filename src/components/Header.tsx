@@ -8,6 +8,7 @@ import { useAuth } from "@/contexts/AuthContext";
 export default function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isSubmissionOpen, setIsSubmissionOpen] = useState(false);
+  const [isEditorialOpen, setIsEditorialOpen] = useState(false);
   const { user } = useAuth();
 
   const toggleMenu = () => {
@@ -18,12 +19,21 @@ export default function Header() {
     setIsSubmissionOpen(!isSubmissionOpen);
   };
 
+  const toggleEditorial = () => {
+    setIsEditorialOpen(!isEditorialOpen);
+  };
+
   const submissionItems = [
     { name: "Submit Your Article", href: "/submission" },
     { name: "Publication Guidelines", href: "/submission/guidelines" },
     { name: "Paper Article Fee", href: "/submission/fee" },
     { name: "Track Article Status", href: "/submission/track" },
     { name: "Article Ethics", href: "/submission/ethics" },
+  ];
+
+  const editorialItems = [
+    { name: "Editorial Board", href: "/editorial-board" },
+    { name: "Join as Reviewer", href: "/editorial-board/join" },
   ];
 
   return (
@@ -45,18 +55,45 @@ export default function Header() {
         <div className="container">
           <div className="flex items-center justify-between">
             <div className="hidden md:flex space-x-1">
-              {[
-                { name: "Home", href: "/" },
-                { name: "Editorial Board", href: "/editorial-board" },
-              ].map((item) => (
-                <Link
-                  key={item.name}
-                  href={item.href}
-                  className="px-3 py-4 text-sm font-medium text-[var(--foreground)] hover:text-[var(--accent)] transition-colors"
+              <Link
+                href="/"
+                className="px-3 py-4 text-sm font-medium text-[var(--foreground)] hover:text-[var(--accent)] transition-colors"
+              >
+                Home
+              </Link>
+              <div className="relative">
+                <button
+                  onClick={toggleEditorial}
+                  className="px-3 py-4 text-sm font-medium text-[var(--foreground)] hover:text-[var(--accent)] transition-colors flex items-center"
                 >
-                  {item.name}
-                </Link>
-              ))}
+                  Editorial Board
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className={`h-4 w-4 ml-1 transition-transform ${isEditorialOpen ? 'rotate-180' : ''}`}
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                  </svg>
+                </button>
+                {isEditorialOpen && (
+                  <div className="absolute left-0 mt-2 w-48 rounded-md shadow-lg bg-[var(--background)] border border-[var(--border)]">
+                    <div className="py-1">
+                      {editorialItems.map((item) => (
+                        <Link
+                          key={item.name}
+                          href={item.href}
+                          className="block px-4 py-2 text-sm text-[var(--foreground)] hover:bg-[var(--secondary-background)]"
+                          onClick={() => setIsEditorialOpen(false)}
+                        >
+                          {item.name}
+                        </Link>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
               <div className="relative">
                 <button
                   onClick={toggleSubmission}
@@ -153,19 +190,26 @@ export default function Header() {
           </div>
           {isMenuOpen && (
             <div className="md:hidden py-2">
-              {[
-                { name: "Home", href: "/" },
-                { name: "Editorial Board", href: "/editorial-board" },
-              ].map((item) => (
-                <Link
-                  key={item.name}
-                  href={item.href}
-                  className="block px-4 py-2 text-sm font-medium text-[var(--foreground)] hover:text-[var(--accent)]"
-                  onClick={() => setIsMenuOpen(false)}
-                >
-                  {item.name}
-                </Link>
-              ))}
+              <Link
+                href="/"
+                className="block px-4 py-2 text-sm font-medium text-[var(--foreground)] hover:text-[var(--accent)]"
+                onClick={() => setIsMenuOpen(false)}
+              >
+                Home
+              </Link>
+              <div className="px-4 py-2">
+                <div className="text-sm font-medium text-[var(--foreground)]">Editorial Board</div>
+                {editorialItems.map((item) => (
+                  <Link
+                    key={item.name}
+                    href={item.href}
+                    className="block pl-4 py-2 text-sm text-[var(--foreground)] hover:text-[var(--accent)]"
+                    onClick={() => setIsMenuOpen(false)}
+                  >
+                    {item.name}
+                  </Link>
+                ))}
+              </div>
               <div className="px-4 py-2">
                 <div className="text-sm font-medium text-[var(--foreground)]">Submission</div>
                 {submissionItems.map((item) => (
