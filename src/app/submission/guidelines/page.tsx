@@ -23,7 +23,7 @@ export default function PublicationGuidelinesPage() {
             <div>
               <h3 className="text-xl font-semibold mb-3 text-[var(--foreground)]">Manuscript Format</h3>
               <ul className="list-disc pl-6 space-y-2">
-                <li>Use Microsoft Word (.doc or .docx format)</li>
+                <li>You can use Microsoft Word (.doc or .docx format)</li>
                 <li>Paper size: A4</li>
                 <li>Margins: 1 inch (2.54 cm) on all sides</li>
                 <li>Font: Times New Roman, 12 point for text, 14 point for headings</li>
