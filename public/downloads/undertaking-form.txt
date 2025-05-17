@@ -1,0 +1,30 @@
+IJAMTS - Author Undertaking Form
+
+This is a placeholder file for the Author Undertaking Form. 
+In a real implementation, this would be a properly formatted Word document (.docx) with the following sections:
+
+1. Author Information
+   - Full Name
+   - Affiliation
+   - Email Address
+   - Contact Number
+
+2. Paper Information
+   - Title of the Paper
+   - Co-authors (if any)
+
+3. Declarations
+   - Originality of work
+   - No concurrent submission
+   - No plagiarism
+   - Ethical compliance
+   - Conflicts of interest disclosure
+
+4. Copyright Transfer
+   - Terms of copyright transfer to IJAMTS
+   - Rights retained by authors
+
+5. Signatures
+   - Space for all authors to sign
+
+Please replace this placeholder with an actual Word document containing the proper form. 

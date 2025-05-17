@@ -9,7 +9,36 @@ export const metadata: Metadata = {
 export default function PublicationGuidelinesPage() {
   return (
     <div className="container py-12">
-      <div className="max-w-4xl mx-auto">
+      <div className="relative max-w-4xl mx-auto">
+        {/* Downloads Box */}
+        <div className="lg:absolute lg:right-[-250px] lg:top-0 lg:w-[220px] w-full mb-8 lg:mb-0 bg-[var(--background)] rounded-xl shadow-lg p-5 border border-[var(--border)]">
+          <h3 className="text-xl font-bold mb-4 text-[var(--foreground)]">Downloads</h3>
+          <ul className="space-y-3">
+            <li>
+              <Link 
+                href="/downloads/undertaking-form.docx" 
+                className="flex items-center text-[var(--accent)] hover:underline"
+              >
+                <svg className="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                  <path fillRule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clipRule="evenodd"></path>
+                </svg>
+                Undertaking Form
+              </Link>
+            </li>
+            <li>
+              <Link 
+                href="/downloads/paper-format.docx" 
+                className="flex items-center text-[var(--accent)] hover:underline"
+              >
+                <svg className="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                  <path fillRule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clipRule="evenodd"></path>
+                </svg>
+                Paper Format
+              </Link>
+            </li>
+          </ul>
+        </div>
+        
         <h1 className="text-3xl font-bold mb-8 text-[var(--foreground)]">Publication Guidelines</h1>
         
         <div className="bg-[var(--background)] rounded-xl shadow-lg p-8 border border-[var(--border)] mb-12">
@@ -110,7 +139,7 @@ export default function PublicationGuidelinesPage() {
             </ol>
             
             <p>
-              An undertaking form will need to be signed by all authors and submitted along with the manuscript. This form can be downloaded from the submission page.
+              An undertaking form will need to be signed by all authors and submitted along with the manuscript. This form can be downloaded from the downloads box.
             </p>
           </div>
         </div>
