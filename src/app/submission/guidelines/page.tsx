@@ -11,7 +11,7 @@ export default function PublicationGuidelinesPage() {
     <div className="container py-12">
       <div className="relative max-w-4xl mx-auto">
         {/* Downloads Box */}
-        <div className="lg:absolute lg:right-[-250px] lg:top-0 lg:w-[220px] w-full mb-8 lg:mb-0 bg-[var(--background)] rounded-xl shadow-lg p-5 border border-[var(--border)]">
+        <div className="lg:absolute lg:right-[-250px] lg:top-20 lg:w-[220px] w-full mb-8 lg:mb-0 bg-[var(--background)] rounded-xl shadow-lg p-5 border border-[var(--border)]">
           <h3 className="text-xl font-bold mb-4 text-[var(--foreground)]">Downloads</h3>
           <ul className="space-y-3">
             <li>

@@ -1,0 +1,27 @@
+IJAMTS - Paper Format Template
+
+This is a placeholder file for the Paper Format Template.
+In a real implementation, this would be a properly formatted Word document (.docx) with the following elements:
+
+1. Title Page Format
+   - Title of the Paper (Times New Roman, 14pt, Bold, Centered)
+   - Author Names (Times New Roman, 12pt, Bold, Centered)
+   - Author Affiliations (Times New Roman, 11pt, Italic, Centered)
+   - Contact Information (Times New Roman, 11pt, Centered)
+   - Abstract (200-250 words, Times New Roman, 11pt, Justified)
+   - Keywords (4-6 keywords, Times New Roman, 11pt, Justified)
+
+2. Main Text Format
+   - Headings and Subheadings (Properly formatted with hierarchical numbering)
+   - Body Text (Times New Roman, 12pt, Justified, 1.5 line spacing)
+   - Page Numbers (Bottom center)
+   - Margins (1 inch on all sides)
+
+3. Tables and Figures
+   - Examples of properly formatted tables
+   - Examples of properly formatted figures with captions
+
+4. References
+   - Examples of properly formatted references following APA 7th edition style
+
+Please replace this placeholder with an actual Word document containing the proper template with all formatting applied. 
