@@ -139,7 +139,7 @@ export default function PublicationGuidelinesPage() {
             </ol>
             
             <p>
-              An undertaking form will need to be signed by all authors and submitted along with the manuscript. This form can be downloaded from the downloads box.
+              An undertaking form must and will need to be signed by all authors and submitted along with the manuscript. This form can be downloaded from the downloads box.
             </p>
           </div>
         </div>
