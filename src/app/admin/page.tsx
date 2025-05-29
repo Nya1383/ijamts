@@ -19,6 +19,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useRouter } from "next/navigation";
 import { toast, Toaster } from "react-hot-toast";
 import { ref } from "firebase/storage";
+import { useMaintenanceMode } from '@/contexts/MaintenanceContext';
 
 type Article = {
   id: string;
@@ -78,7 +79,7 @@ export default function AdminDashboard() {
   const [isEditingTitle, setIsEditingTitle] = useState(false);
   const { user, signOut } = useAuth();
   const router = useRouter();
-  const [maintenanceMode, setMaintenanceMode] = useState(false);
+  const { isMaintenanceMode, toggleMaintenanceMode } = useMaintenanceMode();
 
   // Add debug function to check storage configuration
   const debugStorageConfig = () => {
@@ -103,42 +104,6 @@ export default function AdminDashboard() {
     }
   };
 
-  // Fetch maintenance mode status
-  const fetchMaintenanceStatus = async () => {
-    try {
-      const maintenanceDoc = await getDocs(collection(db, "settings"));
-      if (!maintenanceDoc.empty) {
-        setMaintenanceMode(maintenanceDoc.docs[0].data().maintenanceMode || false);
-      }
-    } catch (error) {
-      console.error("Error fetching maintenance status:", error);
-    }
-  };
-
-  // Toggle maintenance mode
-  const toggleMaintenanceMode = async () => {
-    try {
-      const settingsRef = collection(db, "settings");
-      const settingsDoc = await getDocs(settingsRef);
-      
-      if (settingsDoc.empty) {
-        // Create new settings document
-        await addDoc(settingsRef, { maintenanceMode: !maintenanceMode });
-      } else {
-        // Update existing document
-        await updateDoc(doc(db, "settings", settingsDoc.docs[0].id), {
-          maintenanceMode: !maintenanceMode
-        });
-      }
-      
-      setMaintenanceMode(!maintenanceMode);
-      toast.success(`Maintenance mode ${!maintenanceMode ? 'enabled' : 'disabled'}`);
-    } catch (error) {
-      console.error("Error toggling maintenance mode:", error);
-      toast.error("Failed to toggle maintenance mode");
-    }
-  };
-
   // Run the debug check once on mount when user is authenticated
   useEffect(() => {
     if (user) {
@@ -150,10 +115,14 @@ export default function AdminDashboard() {
       fetchCurrentIssueTitle();
       // Fetch archives
       fetchArchives();
-      // Fetch maintenance status
-      fetchMaintenanceStatus();
     }
   }, [user]);
+
+  useEffect(() => {
+    if (!user) {
+      router.push('/admin/login');
+    }
+  }, [user, router]);
 
   const fetchSubmissions = async () => {
     try {
@@ -661,6 +630,10 @@ export default function AdminDashboard() {
     }
   };
 
+  if (!user) {
+    return null;
+  }
+
   return (
     <ProtectedRoute>
       <div className="container py-12">
@@ -668,24 +641,12 @@ export default function AdminDashboard() {
         <div className="max-w-6xl mx-auto">
           <div className="flex justify-between items-center mb-8">
             <h1 className="text-3xl font-bold text-[var(--foreground)]">Admin Dashboard</h1>
-            <div className="flex gap-4">
-              <button
-                onClick={toggleMaintenanceMode}
-                className={`px-4 py-2 rounded-md text-white transition-colors ${
-                  maintenanceMode 
-                    ? 'bg-red-600 hover:bg-red-700' 
-                    : 'bg-yellow-600 hover:bg-yellow-700'
-                }`}
-              >
-                {maintenanceMode ? 'Disable Maintenance Mode' : 'Enable Maintenance Mode'}
-              </button>
-              <button
-                onClick={handleLogout}
-                className="px-4 py-2 bg-[var(--accent)] text-white rounded-md hover:bg-opacity-90 transition-colors"
-              >
-                Sign Out
-              </button>
-            </div>
+            <button
+              onClick={handleLogout}
+              className="px-4 py-2 bg-[var(--accent)] text-white rounded-md hover:bg-opacity-90 transition-colors"
+            >
+              Sign Out
+            </button>
           </div>
           
           {/* Current Issue Title Section */}
@@ -1061,6 +1022,44 @@ export default function AdminDashboard() {
             </div>
           </div>
         )}
+
+        <div className="bg-[var(--background)] rounded-lg shadow-lg p-6 mb-6">
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-2xl font-bold text-[var(--foreground)]">Site Controls</h2>
+          </div>
+          
+          {/* Maintenance Mode Toggle */}
+          <div className="flex items-center justify-between p-4 bg-[var(--secondary-background)] rounded-lg mb-4">
+            <div>
+              <h3 className="text-lg font-semibold text-[var(--foreground)]">Maintenance Mode</h3>
+              <p className="text-sm text-[var(--secondary-text)]">
+                Toggle maintenance mode to show maintenance page to visitors
+              </p>
+            </div>
+            <button
+              onClick={toggleMaintenanceMode}
+              className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+                isMaintenanceMode
+                  ? 'bg-red-500 text-white hover:bg-red-600'
+                  : 'bg-green-500 text-white hover:bg-green-600'
+              }`}
+            >
+              {isMaintenanceMode ? 'Disable' : 'Enable'} Maintenance Mode
+            </button>
+          </div>
+
+          {/* Status Display */}
+          <div className="mt-4 p-4 border border-[var(--border)] rounded-lg">
+            <p className="text-[var(--secondary-text)]">
+              Current Status: 
+              <span className={`ml-2 font-medium ${
+                isMaintenanceMode ? 'text-red-500' : 'text-green-500'
+              }`}>
+                {isMaintenanceMode ? 'Maintenance Mode Active' : 'Site Online'}
+              </span>
+            </p>
+          </div>
+        </div>
       </div>
     </ProtectedRoute>
   );
