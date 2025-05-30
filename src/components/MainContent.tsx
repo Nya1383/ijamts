@@ -22,7 +22,7 @@ export default function MainContent() {
             </div>
             <div>
               <h3 className="font-semibold text-[var(--foreground)]">ISSN</h3>
-              <p className="text-[var(--secondary-text)]">2582-7359</p>
+              <p className="text-[var(--secondary-text)]">7821-692X</p>
             </div>
           </div>
         </div>
@@ -34,7 +34,7 @@ export default function MainContent() {
         <div className="bg-[var(--background)] rounded-xl shadow-lg p-8 border border-[var(--border)]">
           <p className="mb-6 text-[var(--secondary-text)] text-lg leading-relaxed">
             The International Journal of Advances in Management, Technology, and
-            Science (IJAMTS) (ISSN 2582-7359) invites you to submit your study
+            Science (IJAMTS) (ISSN 7821-692X) invites you to submit your study
             using our online submission system or by email at editor@ijamts.com.
             Ensure that the submitted paper has not already been submitted or
             published elsewhere for publication. It is strongly encouraged to
@@ -46,14 +46,13 @@ export default function MainContent() {
           </p>
           <p className="mb-6 text-[var(--secondary-text)] text-lg leading-relaxed">
             Once your article has been submitted to the International Journal of
-            Advances in Management, Technology, and Science (IJAMTS) ISSN 2582-
-            7359, you are not permitted to submit or present it elsewhere unless
+            Advances in Management, Technology, and Science (IJAMTS) ISSN 7821-692X, you are not permitted to submit or present it elsewhere unless
             it is rejected by the International Journal of Advances in
-            Management, Technology, and Science (IJAMTS) 2582-7359. Accepted
+            Management, Technology, and Science (IJAMTS) 7821-692X. Accepted
             submissions will not be withdrawn or presented in any other journal,
             conference, magazine, or media without the prior consent of the
             International Journal of Advances in Management, Technology, and
-            Science (IJAMTS) (ISSN 2582-7359).
+            Science (IJAMTS) (ISSN 7821-692X).
           </p>
           
           <div className="mt-8 text-center">
