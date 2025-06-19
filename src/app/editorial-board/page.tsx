@@ -26,45 +26,24 @@ export default function EditorialBoardPage() {
   const fallbackBoardMembers: BoardMember[] = [
     {
       id: "1",
-      name: "Dr. Jane Smith",
-      role: "Editor-in-Chief",
-      bio: "Dr. Smith is a Professor of Literature with over 15 years of experience in academic publishing. Her research focuses on comparative literature and modern poetry.",
+      name: "Dr. M.V. Ramana Murthy",
+      role: "Associate Editor",
+      bio: "M.Sc., Ph.D., Rtd. Professor, Department of Mathematics, Osmania University. Dr. Murthy brings extensive experience in mathematical research and academic publishing to the editorial board.",
       order: 1
     },
     {
       id: "2",
-      name: "Prof. Michael Johnson",
+      name: "Prof. Dr S Jeelan",
       role: "Associate Editor",
-      bio: "Professor Johnson specializes in creative writing and contemporary fiction. He has published numerous articles and books on narrative techniques.",
+      bio: "Professor in Management, Director, CDVL at Central University. Prof. Jeelan specializes in management studies and brings valuable expertise in leadership and academic administration.",
       order: 2
     },
     {
       id: "3",
-      name: "Dr. Sarah Williams",
-      role: "Managing Editor",
-      bio: "Dr. Williams has expertise in digital humanities and publishing technologies. She oversees the journal's publication process and digital presence.",
+      name: "Dr. Review Committee",
+      role: "Reviewer",
+      bio: "Our dedicated review committee ensures the highest standards of academic rigor and quality in all published research.",
       order: 3
-    },
-    {
-      id: "4",
-      name: "Prof. David Chen",
-      role: "Review Editor",
-      bio: "Professor Chen's background is in literary criticism and theory. He coordinates the peer review process for all submissions.",
-      order: 4
-    },
-    {
-      id: "5",
-      name: "Dr. Amina Patel",
-      role: "Board Member",
-      bio: "Dr. Patel specializes in world literature and postcolonial studies. She brings a global perspective to the editorial board.",
-      order: 5
-    },
-    {
-      id: "6",
-      name: "Prof. Robert Garcia",
-      role: "Board Member",
-      bio: "Professor Garcia's research focuses on poetry and literary translation. He has translated numerous works from Spanish to English.",
-      order: 6
     },
   ];
 
@@ -255,45 +234,156 @@ export default function EditorialBoardPage() {
       <div className="max-w-6xl mx-auto">
         <h1 className="text-3xl font-bold text-center mb-12">Editorial Board</h1>
         
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {boardMembers.map((member) => (
-            <Link
-              key={member.id}
-              href={`/editorial-board/${member.id}`}
-              className="group h-full"
-            >
-              <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden transition-transform duration-300 group-hover:shadow-lg group-hover:-translate-y-1 h-full flex flex-col">
-                <div className="p-6 flex flex-col flex-grow">
-                  <div className="w-24 h-24 mx-auto mb-4 relative rounded-full overflow-hidden bg-gray-200 flex-shrink-0">
-                    {member.imageUrl ? (
-                      <Image
-                        src={member.imageUrl}
-                        alt={member.name}
-                        fill
-                        className="object-cover"
-                      />
-                    ) : (
-                      <div className={`w-full h-full flex items-center justify-center ${getBackgroundColor(member.id)} text-white text-2xl font-bold`}>
-                        {getInitials(member.name)}
+        {/* Group members by role */}
+        {/* Associate Editors Section */}
+        {boardMembers.filter(member => member.role === "Associate Editor").length > 0 && (
+          <div className="mb-12">
+            <h2 className="text-2xl font-bold text-[var(--foreground)] mb-8 border-b-2 border-[var(--accent)] pb-2">
+              Associate Editors
+            </h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+              {boardMembers
+                .filter(member => member.role === "Associate Editor")
+                .map((member) => (
+                <Link
+                  key={member.id}
+                  href={`/editorial-board/${member.id}`}
+                  className="group h-full"
+                >
+                  <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden transition-transform duration-300 group-hover:shadow-lg group-hover:-translate-y-1 h-full flex flex-col">
+                    <div className="p-6 flex flex-col flex-grow">
+                      <div className="w-24 h-24 mx-auto mb-4 relative rounded-full overflow-hidden bg-gray-200 flex-shrink-0">
+                        {member.imageUrl ? (
+                          <Image
+                            src={member.imageUrl}
+                            alt={member.name}
+                            fill
+                            className="object-cover"
+                          />
+                        ) : (
+                          <div className={`w-full h-full flex items-center justify-center ${getBackgroundColor(member.id)} text-white text-2xl font-bold`}>
+                            {getInitials(member.name)}
+                          </div>
+                        )}
                       </div>
-                    )}
+                      <div className="flex flex-col flex-grow">
+                        <h2 className="text-xl font-semibold text-center text-gray-900 dark:text-white mb-2">
+                          {member.name}
+                        </h2>
+                        <p className="text-blue-600 dark:text-blue-400 text-center mb-3">
+                          {member.role}
+                        </p>
+                        <p className="text-gray-600 dark:text-gray-300 text-sm line-clamp-3 flex-grow">
+                          {member.bio}
+                        </p>
+                      </div>
+                    </div>
                   </div>
-                  <div className="flex flex-col flex-grow">
-                    <h2 className="text-xl font-semibold text-center text-gray-900 dark:text-white mb-2">
-                      {member.name}
-                    </h2>
-                    <p className="text-blue-600 dark:text-blue-400 text-center mb-3">
-                      {member.role}
-                    </p>
-                    <p className="text-gray-600 dark:text-gray-300 text-sm line-clamp-3 flex-grow">
-                      {member.bio}
-                    </p>
+                </Link>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Reviewers Section */}
+        {boardMembers.filter(member => member.role === "Reviewer").length > 0 && (
+          <div className="mb-12">
+            <h2 className="text-2xl font-bold text-[var(--foreground)] mb-8 border-b-2 border-[var(--accent)] pb-2">
+              Reviewers
+            </h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+              {boardMembers
+                .filter(member => member.role === "Reviewer")
+                .map((member) => (
+                <Link
+                  key={member.id}
+                  href={`/editorial-board/${member.id}`}
+                  className="group h-full"
+                >
+                  <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden transition-transform duration-300 group-hover:shadow-lg group-hover:-translate-y-1 h-full flex flex-col">
+                    <div className="p-6 flex flex-col flex-grow">
+                      <div className="w-24 h-24 mx-auto mb-4 relative rounded-full overflow-hidden bg-gray-200 flex-shrink-0">
+                        {member.imageUrl ? (
+                          <Image
+                            src={member.imageUrl}
+                            alt={member.name}
+                            fill
+                            className="object-cover"
+                          />
+                        ) : (
+                          <div className={`w-full h-full flex items-center justify-center ${getBackgroundColor(member.id)} text-white text-2xl font-bold`}>
+                            {getInitials(member.name)}
+                          </div>
+                        )}
+                      </div>
+                      <div className="flex flex-col flex-grow">
+                        <h2 className="text-xl font-semibold text-center text-gray-900 dark:text-white mb-2">
+                          {member.name}
+                        </h2>
+                        <p className="text-blue-600 dark:text-blue-400 text-center mb-3">
+                          {member.role}
+                        </p>
+                        <p className="text-gray-600 dark:text-gray-300 text-sm line-clamp-3 flex-grow">
+                          {member.bio}
+                        </p>
+                      </div>
+                    </div>
                   </div>
-                </div>
-              </div>
-            </Link>
-          ))}
-        </div>
+                </Link>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Other Roles Section (if any) */}
+        {boardMembers.filter(member => member.role !== "Associate Editor" && member.role !== "Reviewer").length > 0 && (
+          <div className="mb-12">
+            <h2 className="text-2xl font-bold text-[var(--foreground)] mb-8 border-b-2 border-[var(--accent)] pb-2">
+              Other Board Members
+            </h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+              {boardMembers
+                .filter(member => member.role !== "Associate Editor" && member.role !== "Reviewer")
+                .map((member) => (
+                <Link
+                  key={member.id}
+                  href={`/editorial-board/${member.id}`}
+                  className="group h-full"
+                >
+                  <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden transition-transform duration-300 group-hover:shadow-lg group-hover:-translate-y-1 h-full flex flex-col">
+                    <div className="p-6 flex flex-col flex-grow">
+                      <div className="w-24 h-24 mx-auto mb-4 relative rounded-full overflow-hidden bg-gray-200 flex-shrink-0">
+                        {member.imageUrl ? (
+                          <Image
+                            src={member.imageUrl}
+                            alt={member.name}
+                            fill
+                            className="object-cover"
+                          />
+                        ) : (
+                          <div className={`w-full h-full flex items-center justify-center ${getBackgroundColor(member.id)} text-white text-2xl font-bold`}>
+                            {getInitials(member.name)}
+                          </div>
+                        )}
+                      </div>
+                      <div className="flex flex-col flex-grow">
+                        <h2 className="text-xl font-semibold text-center text-gray-900 dark:text-white mb-2">
+                          {member.name}
+                        </h2>
+                        <p className="text-blue-600 dark:text-blue-400 text-center mb-3">
+                          {member.role}
+                        </p>
+                        <p className="text-gray-600 dark:text-gray-300 text-sm line-clamp-3 flex-grow">
+                          {member.bio}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

@@ -14,7 +14,7 @@ EMAIL_SECURE=false
 EMAIL_USER=your_email@gmail.com
 EMAIL_PASS=your_app_password
 EMAIL_FROM=noreply@ijamts.com
-EMAIL_TO=editor@ijamts.com
+EMAIL_TO=support@ijamts.com
 ```
 
 2. Replace the values with your actual email service configuration:

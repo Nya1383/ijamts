@@ -74,7 +74,7 @@ export async function POST(request: Request) {
     // Configure email data
     const mailOptions = {
       from: process.env.EMAIL_FROM || 'noreply@ijamts.com',
-      to: process.env.EMAIL_TO || 'editor@ijamts.com',
+      to: process.env.EMAIL_TO || 'support@ijamts.com',
       subject: 'New Reviewer Application - IJAMTS',
       html: htmlContent,
       replyTo: email,
