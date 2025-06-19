@@ -12,7 +12,7 @@ export default function SchemaOrg() {
     "description": "A peer-reviewed, open access journal dedicated to publishing high-quality research in various fields of science and technology.",
     "publisher": {
       "@type": "Organization",
-      "name": "IJAMTS Publishing House",
+      "name": "xxxxxxx",
       "logo": {
         "@type": "ImageObject",
         "url": "https://example.com/logo.svg"
@@ -27,7 +27,7 @@ export default function SchemaOrg() {
     "copyrightYear": currentYear,
     "copyrightHolder": {
       "@type": "Organization",
-      "name": "IJAMTS Publishing House"
+      "name": "xxxxxxx"
     },
     "license": "https://creativecommons.org/licenses/by/4.0/"
   };

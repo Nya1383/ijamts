@@ -101,7 +101,7 @@ export default function Footer() {
                   />
                 </svg>
                 <span>
-                  IJAMTS Publishing House,
+                  xxxxxxx,
                   <br />
                   xxxxxxxxx,
                   <br />
