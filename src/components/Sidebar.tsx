@@ -75,7 +75,7 @@ export default function Sidebar() {
       <div className="bg-[var(--background)] rounded-lg shadow-sm p-6 border border-[var(--border)]">
         <h4 className="text-[var(--foreground)] font-semibold mb-4">Publisher</h4>
         <address className="not-italic text-sm text-[var(--secondary-text)]">
-          IJAMTS Publishing House
+          xxxxxxx
           <br />
           xxxxxxxxx
           <br />
