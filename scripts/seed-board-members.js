@@ -26,40 +26,22 @@ const db = getFirestore(app);
 // Sample board members data
 const boardMembers = [
   {
-    name: "Dr. Jane Smith",
-    role: "Editor-in-Chief",
-    bio: "Dr. Smith is a Professor of Literature with over 15 years of experience in academic publishing. Her research focuses on comparative literature and modern poetry.",
+    name: "Dr. M.V. Ramana Murthy",
+    role: "Associate Editor",
+    bio: "M.Sc., Ph.D., Rtd. Professor, Department of Mathematics, Osmania University. Dr. Murthy brings extensive experience in mathematical research and academic publishing to the editorial board.",
     order: 1
   },
   {
-    name: "Prof. Michael Johnson",
-    role: "Associate Editor",
-    bio: "Professor Johnson specializes in creative writing and contemporary fiction. He has published numerous articles and books on narrative techniques.",
+    name: "Prof. Dr S Jeelan",
+    role: "Associate Editor", 
+    bio: "Professor in Management, Director, CDVL at Central University. Prof. Jeelan specializes in management studies and brings valuable expertise in leadership and academic administration.",
     order: 2
   },
   {
-    name: "Dr. Sarah Williams",
-    role: "Managing Editor",
-    bio: "Dr. Williams has expertise in digital humanities and publishing technologies. She oversees the journal's publication process and digital presence.",
+    name: "Review Committee",
+    role: "Reviewer",
+    bio: "Our dedicated review committee ensures the highest standards of academic rigor and quality in all published research. The committee consists of experts from various fields who evaluate submissions through a rigorous peer-review process.",
     order: 3
-  },
-  {
-    name: "Prof. David Chen",
-    role: "Review Editor",
-    bio: "Professor Chen's background is in literary criticism and theory. He coordinates the peer review process for all submissions.",
-    order: 4
-  },
-  {
-    name: "Dr. Amina Patel",
-    role: "Board Member",
-    bio: "Dr. Patel specializes in world literature and postcolonial studies. She brings a global perspective to the editorial board.",
-    order: 5
-  },
-  {
-    name: "Prof. Robert Garcia",
-    role: "Board Member",
-    bio: "Professor Garcia's research focuses on poetry and literary translation. He has translated numerous works from Spanish to English.",
-    order: 6
   },
 ];
 

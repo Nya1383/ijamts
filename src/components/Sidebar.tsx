@@ -49,7 +49,7 @@ export default function Sidebar() {
                 d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
               />
             </svg>
-            <span>editor@ijamts.com</span>
+            <span>support@ijamts.com</span>
           </li>
           <li className="flex items-center space-x-2 text-sm text-[var(--secondary-text)]">
             {/* <svg
@@ -77,11 +77,11 @@ export default function Sidebar() {
         <address className="not-italic text-sm text-[var(--secondary-text)]">
           IJAMTS Publishing House
           <br />
-          123 Academic Avenue
+          xxxxxxxxx
           <br />
-          Research City, 54321
+          xxxxxxxxx
           <br />
-          Country
+          xxxxxxxxx
         </address>
       </div>
 

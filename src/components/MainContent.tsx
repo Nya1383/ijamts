@@ -35,7 +35,7 @@ export default function MainContent() {
           <p className="mb-6 text-[var(--secondary-text)] text-lg leading-relaxed">
             The International Journal of Advances in Management, Technology, and
             Science (IJAMTS) (ISSN 7821-692X) invites you to submit your study
-            using our online submission system or by email at editor@ijamts.com.
+            using our online submission system or by email at support@ijamts.com.
             Ensure that the submitted paper has not already been submitted or
             published elsewhere for publication. It is strongly encouraged to
             submit original, plagiarism-free articles solely for consideration;
