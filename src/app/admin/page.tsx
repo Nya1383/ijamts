@@ -14,6 +14,7 @@ import {
   addDoc,
 } from "firebase/firestore";
 import DocumentViewer from "@/components/DocumentViewer";
+import AdminFileUpload from "@/components/AdminFileUpload";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import { useAuth } from "@/contexts/AuthContext";
 import { useRouter } from "next/navigation";
@@ -29,7 +30,7 @@ type Article = {
   timestamp: Date;
   fileType: string;
   status?: string;
-  undertakingId: string;
+  undertakingId?: string;
   issue?: string;
   title?: string;
   abstract?: string;
@@ -273,9 +274,13 @@ export default function AdminDashboard() {
     }
     
     try {
-      // Delete both article and undertaking documents
+      // Delete article document
       await deleteDoc(doc(db, "articles", article.id));
-      await deleteDoc(doc(db, "undertakings", article.undertakingId));
+      
+      // Delete undertaking document only if it exists (not for admin submissions)
+      if (article.undertakingId) {
+        await deleteDoc(doc(db, "undertakings", article.undertakingId));
+      }
       
       toast.success(`"${article.name}" has been rejected and deleted`);
       
@@ -420,12 +425,14 @@ export default function AdminDashboard() {
                       >
                         View Article
                       </button>
-                      <button
-                        onClick={() => handleViewDocument(article, 'undertaking')}
-                        className="inline-flex items-center px-3 py-1 border border-transparent text-sm leading-4 font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none"
-                      >
-                        View Undertaking
-                      </button>
+                      {article.undertakingId && (
+                        <button
+                          onClick={() => handleViewDocument(article, 'undertaking')}
+                          className="inline-flex items-center px-3 py-1 border border-transparent text-sm leading-4 font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none"
+                        >
+                          View Undertaking
+                        </button>
+                      )}
                       <button
                         onClick={() => handleApproveClick(article)}
                         className="inline-flex items-center px-3 py-1 border border-transparent text-sm leading-4 font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none"
@@ -720,12 +727,26 @@ export default function AdminDashboard() {
               >
                 Archives
               </button>
+              <button
+                className={`py-3 px-4 font-medium text-sm border-b-2 ${
+                  activeTab === "submit"
+                    ? "border-[var(--accent)] text-[var(--accent)]"
+                    : "border-transparent text-[var(--secondary-text)] hover:text-[var(--foreground)]"
+                } transition-colors`}
+                onClick={() => setActiveTab("submit")}
+              >
+                Submit Article
+              </button>
             </div>
           </div>
           
           {loading ? (
             <div className="flex justify-center py-12">
               <div className="animate-spin h-8 w-8 border-4 border-[var(--accent)] rounded-full border-t-transparent"></div>
+            </div>
+          ) : activeTab === "submit" ? (
+            <div className="space-y-6">
+              <AdminFileUpload onArticleSubmitted={fetchSubmissions} />
             </div>
           ) : activeTab === "archives" ? (
             <div className="space-y-6">
@@ -915,8 +936,8 @@ export default function AdminDashboard() {
           <DocumentViewer
             documentUrl={viewingDocument.downloadURL}
             fileName={viewingDocument.name}
-            undertakingUrl={undertakings[viewingDocument.undertakingId]?.downloadURL}
-            undertakingName={undertakings[viewingDocument.undertakingId]?.name}
+            undertakingUrl={viewingDocument.undertakingId ? undertakings[viewingDocument.undertakingId]?.downloadURL : undefined}
+            undertakingName={viewingDocument.undertakingId ? undertakings[viewingDocument.undertakingId]?.name : undefined}
             onClose={handleCloseViewer}
           />
         )}
