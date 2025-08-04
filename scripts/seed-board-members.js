@@ -26,6 +26,12 @@ const db = getFirestore(app);
 // Sample board members data
 const boardMembers = [
   {
+    name: "Dr. Sushma Karnati",
+    role: "Chief Editor",
+    bio: "Chief Editor of International Journal of Advances in Management, Technology and Science (IJAMTS). Dr. Karnati brings extensive leadership and editorial expertise to guide the journal's academic excellence.",
+    order: 0
+  },
+  {
     name: "Dr. M.V. Ramana Murthy",
     role: "Associate Editor",
     bio: "M.Sc., Ph.D., Rtd. Professor, Department of Mathematics, Osmania University. Dr. Murthy brings extensive experience in mathematical research and academic publishing to the editorial board.",
@@ -38,10 +44,28 @@ const boardMembers = [
     order: 2
   },
   {
-    name: "Review Committee",
+    name: "Dr Siva Shankar Ramasamy",
     role: "Reviewer",
-    bio: "Our dedicated review committee ensures the highest standards of academic rigor and quality in all published research. The committee consists of experts from various fields who evaluate submissions through a rigorous peer-review process.",
+    bio: "Professor, International College of Digital Innovation, Chiang Mai University, 239, Nimmanahaemin Road, Suthep, Muang, Chiang Mai-50200, Thailand.",
     order: 3
+  },
+  {
+    name: "Dr. Giri Ramadoss",
+    role: "Reviewer",
+    bio: "Professor, School of computing and information Sciences, University of Technology and Applied Sciences, Muscat, Sultanate of Oman. Email: doss.girish@gmail.com",
+    order: 4
+  },
+  {
+    name: "Dr. G Vidya Sagar Rao",
+    role: "Reviewer",
+    bio: "Assistant Professor, Department of Management, Osmania University, Hyderabad.",
+    order: 5
+  },
+  {
+    name: "Dr Sudhir Ranjan Pattanaik",
+    role: "Reviewer",
+    bio: "Professor, Department of Computer Science and Engineering, Berhampur, Odisha - 761008. Email: sudhir.pattanaik@nist.edu",
+    order: 6
   },
 ];
 

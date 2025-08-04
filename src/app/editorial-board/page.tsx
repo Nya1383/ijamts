@@ -25,6 +25,13 @@ export default function EditorialBoardPage() {
   // Fallback data in case Firestore fetch fails
   const fallbackBoardMembers: BoardMember[] = [
     {
+      id: "0",
+      name: "Dr. Sushma Karnati",
+      role: "Chief Editor",
+      bio: "Chief Editor of International Journal of Advances in Management, Technology and Science (IJAMTS). Dr. Karnati brings extensive leadership and editorial expertise to guide the journal's academic excellence.",
+      order: 0
+    },
+    {
       id: "1",
       name: "Dr. M.V. Ramana Murthy",
       role: "Associate Editor",
@@ -40,10 +47,31 @@ export default function EditorialBoardPage() {
     },
     {
       id: "3",
-      name: "Dr. Review Committee",
+      name: "Dr Siva Shankar Ramasamy",
       role: "Reviewer",
-      bio: "Our dedicated review committee ensures the highest standards of academic rigor and quality in all published research.",
+      bio: "Professor, International College of Digital Innovation, Chiang Mai University, 239, Nimmanahaemin Road, Suthep, Muang, Chiang Mai-50200, Thailand.",
       order: 3
+    },
+    {
+      id: "4",
+      name: "Dr. Giri Ramadoss",
+      role: "Reviewer",
+      bio: "Professor, School of computing and information Sciences, University of Technology and Applied Sciences, Muscat, Sultanate of Oman. Email: doss.girish@gmail.com",
+      order: 4
+    },
+    {
+      id: "5",
+      name: "Dr. G Vidya Sagar Rao",
+      role: "Reviewer",
+      bio: "Assistant Professor, Department of Management, Osmania University, Hyderabad.",
+      order: 5
+    },
+    {
+      id: "6",
+      name: "Dr Sudhir Ranjan Pattanaik",
+      role: "Reviewer",
+      bio: "Professor, Department of Computer Science and Engineering, Berhampur, Odisha - 761008. Email: sudhir.pattanaik@nist.edu",
+      order: 6
     },
   ];
 
@@ -235,6 +263,56 @@ export default function EditorialBoardPage() {
         <h1 className="text-3xl font-bold text-center mb-12">Editorial Board</h1>
         
         {/* Group members by role */}
+        {/* Chief Editor Section */}
+        {boardMembers.filter(member => member.role === "Chief Editor").length > 0 && (
+          <div className="mb-12">
+            <h2 className="text-2xl font-bold text-[var(--foreground)] mb-8 border-b-2 border-[var(--accent)] pb-2">
+              Chief Editor
+            </h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+              {boardMembers
+                .filter(member => member.role === "Chief Editor")
+                .map((member) => (
+                <Link
+                  key={member.id}
+                  href={`/editorial-board/${member.id}`}
+                  className="group h-full"
+                >
+                  <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden transition-transform duration-300 group-hover:shadow-lg group-hover:-translate-y-1 h-full flex flex-col">
+                    <div className="p-6 flex flex-col flex-grow">
+                      <div className="w-24 h-24 mx-auto mb-4 relative rounded-full overflow-hidden bg-gray-200 flex-shrink-0">
+                        {member.imageUrl ? (
+                          <Image
+                            src={member.imageUrl}
+                            alt={member.name}
+                            fill
+                            className="object-cover"
+                          />
+                        ) : (
+                          <div className={`w-full h-full flex items-center justify-center ${getBackgroundColor(member.id)} text-white text-2xl font-bold`}>
+                            {getInitials(member.name)}
+                          </div>
+                        )}
+                      </div>
+                      <div className="flex flex-col flex-grow">
+                        <h2 className="text-xl font-semibold text-center text-gray-900 dark:text-white mb-2">
+                          {member.name}
+                        </h2>
+                        <p className="text-blue-600 dark:text-blue-400 text-center mb-3">
+                          {member.role}
+                        </p>
+                        <p className="text-gray-600 dark:text-gray-300 text-sm line-clamp-3 flex-grow">
+                          {member.bio}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          </div>
+        )}
+
         {/* Associate Editors Section */}
         {boardMembers.filter(member => member.role === "Associate Editor").length > 0 && (
           <div className="mb-12">
